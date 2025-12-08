@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nhoy Official - Premium Hub</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Serif+Khmer:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'], khmer: ['Noto Serif Khmer', 'serif'] },
+                    colors: {
+                        bg: '#050510',
+                        glass: 'rgba(255, 255, 255, 0.05)',
+                        primary: '#6366f1',
+                        accent: '#a855f7',
+                        success: '#10b981',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #050510; color: white; -webkit-tap-highlight-color: transparent; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #050510; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .glass-nav {
+            background: rgba(15, 20, 35, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        
+        .glass-card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.03) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        #mobile-menu { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease; transform-origin: top center; }
+        .menu-hidden { transform: scaleY(0.95) translateY(-20px); opacity: 0; pointer-events: none; }
+        .menu-visible { transform: scaleY(1) translateY(0); opacity: 1; pointer-events: auto; }
+        
+        .menu-item.active { background: linear-gradient(90deg, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 100%); border-left: 3px solid #6366f1; }
+        
+        .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; opacity: 0; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen relative overflow-x-hidden selection:bg-primary selection:text-white flex flex-col">
+
+    <!-- Ambient Background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] opacity-40"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-accent/20 rounded-full blur-[120px] opacity-40"></div>
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-4 left-4 right-4 max-w-6xl mx-auto z-50">
+        <div class="glass-nav rounded-2xl h-16 flex items-center justify-between px-4 relative z-50">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="resetView()">
+                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-primary to-accent p-[2px]">
+                    <img src="https://i.pinimg.com/1200x/14/a1/71/14a171de882e567cc020668c691eba2d.jpg" class="w-full h-full rounded-full object-cover border border-black/50">
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-white font-bold text-lg leading-none tracking-tight">Nhoy<span class="text-primary">Hub</span></span>
+                    <span class="text-[10px] text-gray-400 font-medium tracking-widest uppercase">Official Store</span>
+                </div>
+            </div>
+
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex items-center gap-1 bg-white/5 rounded-xl p-1">
+                <button onclick="selectCategory('esign', this)" class="nav-btn-d px-5 py-2 rounded-lg text-sm font-medium transition-all bg-white/10 text-white shadow-sm">ESIGN</button>
+                <button onclick="selectCategory('ksign', this)" class="nav-btn-d px-5 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-all">Ksign</button>
+                <button onclick="selectCategory('roblox', this)" class="nav-btn-d px-5 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-all">Roblox</button>
+                <button onclick="selectCategory('troll', this)" class="nav-btn-d px-5 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-all">TrollStore</button>
+            </div>
+
+            <!-- Hamburger -->
+            <button onclick="toggleMenu()" class="md:hidden w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-white active:scale-95 transition-all">
+                <i id="menu-icon" class="fa-solid fa-bars-staggered text-lg"></i>
+            </button>
+        </div>
+
+        <!-- MOBILE MENU -->
+        <div id="mobile-menu" class="absolute top-[72px] left-0 right-0 glass-nav rounded-2xl p-2 flex flex-col gap-1 menu-hidden z-40 overflow-hidden md:hidden">
+            <button onclick="selectCategory('esign', this)" class="menu-item active w-full p-3 rounded-xl flex items-center gap-4 text-left transition-all group hover:bg-white/5">
+                <div class="w-11 h-11 rounded-xl overflow-hidden shadow-lg border border-white/10 shrink-0"><img src="https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp" class="w-full h-full object-cover"></div>
+                <div><h3 class="font-bold text-white text-sm group-hover:text-blue-400 transition-colors">ESIGN Apps</h3><p class="text-[11px] text-gray-400">Sign IPAs without PC</p></div>
+                <i class="fa-solid fa-chevron-right ml-auto text-xs text-gray-600"></i>
+            </button>
+            <button onclick="selectCategory('ksign', this)" class="menu-item w-full p-3 rounded-xl flex items-center gap-4 text-left transition-all group hover:bg-white/5">
+                <div class="w-11 h-11 rounded-xl overflow-hidden shadow-lg border border-white/10 shrink-0"><img src="https://khoindvn.io.vn/img/pf/favicon.ico" class="w-full h-full object-cover"></div>
+                <div><h3 class="font-bold text-white text-sm group-hover:text-yellow-400 transition-colors">Ksign Certs</h3><p class="text-[11px] text-gray-400">Premium Certificates</p></div>
+                <i class="fa-solid fa-chevron-right ml-auto text-xs text-gray-600"></i>
+            </button>
+            <button onclick="selectCategory('roblox', this)" class="menu-item w-full p-3 rounded-xl flex items-center gap-4 text-left transition-all group hover:bg-white/5">
+                <div class="w-11 h-11 rounded-xl overflow-hidden shadow-lg border border-white/10 shrink-0"><img src="https://deltaios-executor.com/Icon.jpg" class="w-full h-full object-cover"></div>
+                <div><h3 class="font-bold text-white text-sm group-hover:text-purple-400 transition-colors">Roblox Executors</h3><p class="text-[11px] text-gray-400">Delta, Codex & Scripts</p></div>
+                <i class="fa-solid fa-chevron-right ml-auto text-xs text-gray-600"></i>
+            </button>
+            <button onclick="selectCategory('troll', this)" class="menu-item w-full p-3 rounded-xl flex items-center gap-4 text-left transition-all group hover:bg-white/5">
+                <div class="w-11 h-11 rounded-xl overflow-hidden shadow-lg border border-white/10 shrink-0"><img src="https://i.pinimg.com/474x/1c/d7/04/1cd7044b82d9ef32d1830008a262e747.jpg" class="w-full h-full object-cover"></div>
+                <div><h3 class="font-bold text-white text-sm group-hover:text-green-400 transition-colors">TrollStore</h3><p class="text-[11px] text-gray-400">Permanent Signing</p></div>
+                <i class="fa-solid fa-chevron-right ml-auto text-xs text-gray-600"></i>
+            </button>
+            <div class="mt-2 pt-3 border-t border-white/5 flex gap-2">
+                <a href="https://t.me/nhoy200" target="_blank" class="flex-1 py-2.5 rounded-xl bg-[#229ED9]/10 text-[#229ED9] text-xs font-bold flex items-center justify-center gap-2 hover:bg-[#229ED9] hover:text-white transition-colors"><i class="fa-brands fa-telegram text-base"></i> Telegram</a>
+                <a href="https://www.youtube.com/@xai-qq" target="_blank" class="flex-1 py-2.5 rounded-xl bg-red-500/10 text-red-500 text-xs font-bold flex items-center justify-center gap-2 hover:bg-red-500 hover:text-white transition-colors"><i class="fa-brands fa-youtube text-base"></i> Youtube</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="relative z-10 pt-32 pb-20 max-w-6xl mx-auto px-4 sm:px-6 flex-grow w-full">
+        
+        <!-- Hero Header -->
+        <div id="hero-header" class="text-center mb-10 fade-in-up">
+            <h1 class="text-4xl md:text-6xl font-bold tracking-tight mb-4 leading-tight">Premium <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-pink-500">iOS Tools</span></h1>
+            <p class="text-gray-400 text-sm md:text-lg max-w-xl mx-auto font-khmer leading-relaxed mb-6">ប្រភពទាញយក Esign, Ksign, TrollStore និង Roblox Executor ដោយឥតគិតថ្លៃ។</p>
+
+            <!-- View Counter -->
+            <div class="flex items-center justify-center gap-2 opacity-80">
+                <div class="flex items-center gap-2 bg-white/5 px-4 py-1.5 rounded-full border border-white/10 backdrop-blur-md">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    <span class="text-xs text-gray-400">Total Visits:</span>
+                    <span id="view-counter" class="text-xs font-bold font-mono text-white">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Horizontal Filter Chips -->
+        <div class="flex overflow-x-auto gap-3 pb-2 mb-8 no-scrollbar snap-x">
+            <button onclick="selectCategory('esign', this)" class="chip-btn active snap-center shrink-0 pl-2 pr-6 py-2 rounded-full border border-white/10 text-sm font-bold whitespace-nowrap transition-all flex items-center gap-3 bg-white/10 text-white hover:bg-white/15">
+                <img src="https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp" class="w-7 h-7 rounded-full border border-white/20"> ESIGN
+            </button>
+            <button onclick="selectCategory('ksign', this)" class="chip-btn snap-center shrink-0 pl-2 pr-6 py-2 rounded-full border border-white/10 text-sm font-bold whitespace-nowrap transition-all flex items-center gap-3 text-gray-400 hover:text-white hover:bg-white/5">
+                <img src="https://khoindvn.io.vn/img/pf/favicon.ico" class="w-7 h-7 rounded-full border border-white/20"> Ksign
+            </button>
+            <button onclick="selectCategory('roblox', this)" class="chip-btn snap-center shrink-0 pl-2 pr-6 py-2 rounded-full border border-white/10 text-sm font-bold whitespace-nowrap transition-all flex items-center gap-3 text-gray-400 hover:text-white hover:bg-white/5">
+                <img src="https://deltaios-executor.com/Icon.jpg" class="w-7 h-7 rounded-full border border-white/20"> Roblox
+            </button>
+            <button onclick="selectCategory('troll', this)" class="chip-btn snap-center shrink-0 pl-2 pr-6 py-2 rounded-full border border-white/10 text-sm font-bold whitespace-nowrap transition-all flex items-center gap-3 text-gray-400 hover:text-white hover:bg-white/5">
+                <img src="https://i.pinimg.com/474x/1c/d7/04/1cd7044b82d9ef32d1830008a262e747.jpg" class="w-7 h-7 rounded-full border border-white/20"> TrollStore
+            </button>
+        </div>
+
+        <!-- Grid Container -->
+        <div id="grid-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Cards will be injected here -->
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="relative z-10 border-t border-white/5 bg-black/40 backdrop-blur-xl pt-16 pb-8 mt-auto">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <!-- Branding -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-accent p-[1px]">
+                            <img src="https://i.pinimg.com/1200x/14/a1/71/14a171de882e567cc020668c691eba2d.jpg" class="w-full h-full rounded-full object-cover">
+                        </div>
+                        <span class="text-xl font-bold tracking-tight">Nhoy<span class="text-primary">Hub</span></span>
+                    </div>
+                    <p class="text-gray-400 text-sm leading-relaxed">Your source for esign, Trollstore, and other iOS utilities. Providing free downloads and resources for the community.</p>
+                </div>
+                <!-- Links -->
+                <div>
+                    <h3 class="text-white font-bold mb-5 relative inline-block after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-8 after:h-0.5 after:bg-primary rounded-full">Quick Links</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><button onclick="resetView()" class="hover:text-primary transition-colors">Home</button></li>
+                        <li><button onclick="selectCategory('esign')" class="hover:text-primary transition-colors">ESIGN</button></li>
+                        <li><button onclick="selectCategory('roblox')" class="hover:text-primary transition-colors">Roblox Hack</button></li>
+                        <li><button onclick="selectCategory('troll')" class="hover:text-primary transition-colors">Troll Store</button></li>
+                    </ul>
+                </div>
+                <!-- Contact -->
+                <div>
+                    <h3 class="text-white font-bold mb-5 relative inline-block after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-8 after:h-0.5 after:bg-primary rounded-full">Contact Us</h3>
+                    <div class="flex gap-3">
+                        <a href="https://t.me/nhoy200" target="_blank" class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-[#229ED9] hover:bg-[#229ED9] hover:text-white transition-all border border-white/5"><i class="fa-brands fa-telegram text-lg"></i></a>
+                        <a href="https://www.youtube.com/@xai-qq" target="_blank" class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all border border-white/5"><i class="fa-brands fa-youtube text-lg"></i></a>
+                    </div>
+                </div>
+                <!-- Language -->
+                <div>
+                    <h3 class="text-white font-bold mb-5 relative inline-block after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-8 after:h-0.5 after:bg-primary rounded-full">Language</h3>
+                    <div class="flex flex-col gap-3">
+                        <button class="flex items-center justify-between w-full px-4 py-3 rounded-xl bg-white/5 border border-primary/50 text-white text-sm font-medium"><span>English</span><i class="fa-solid fa-check text-primary"></i></button>
+                        <button class="flex items-center justify-between w-full px-4 py-3 rounded-xl bg-transparent border border-white/10 text-gray-400 text-sm font-medium"><span>ខ្មែរ</span></button>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-8 text-center md:text-left"><p class="text-gray-500 text-xs">© 2025 Nhoy Official. All rights reserved.</p></div>
+        </div>
+    </footer>
+
+    <!-- LOCKER MODAL -->
+    <div id="locker-modal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-md transition-opacity duration-300 opacity-0" id="locker-backdrop"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div id="locker-content" class="w-full max-w-[400px] bg-[#0a0a0a] border border-white/10 rounded-3xl overflow-hidden shadow-2xl transform scale-95 opacity-0 transition-all duration-300 relative">
+                <div class="h-28 bg-gradient-to-br from-primary/20 via-purple-900/20 to-black flex items-center justify-center relative overflow-hidden">
+                    <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-30"></div>
+                    <img id="locker-icon" src="" class="w-16 h-16 rounded-2xl border border-white/10 shadow-2xl z-10 object-cover bg-black/50">
+                    <button onclick="closeLocker()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/50 text-white/50 hover:text-white flex items-center justify-center z-20"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="p-6">
+                    <div class="text-center mb-6"><h3 class="text-xl font-bold text-white mb-1">Unlock Link</h3><p class="text-gray-400 text-xs">Complete steps to download <br> <span id="locker-app-name" class="text-primary font-bold">App Name</span></p></div>
+                    <div class="relative flex justify-between mb-8 px-8">
+                        <div class="absolute top-1/2 left-0 w-full h-0.5 bg-white/10 -z-10"></div>
+                        <div id="dot-1" class="w-8 h-8 rounded-full bg-[#1a1a1a] text-gray-500 border border-white/10 flex items-center justify-center text-xs font-bold ring-4 ring-[#0a0a0a]">1</div>
+                        <div id="dot-2" class="w-8 h-8 rounded-full bg-[#1a1a1a] text-gray-500 border border-white/10 flex items-center justify-center text-xs font-bold ring-4 ring-[#0a0a0a]">2</div>
+                        <div id="dot-3" class="w-8 h-8 rounded-full bg-[#1a1a1a] text-gray-500 border border-white/10 flex items-center justify-center text-xs font-bold ring-4 ring-[#0a0a0a]"><i class="fa-solid fa-lock text-[10px]"></i></div>
+                    </div>
+                    <div id="action-area" class="space-y-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const Esign = {
+            esign: [
+                { title: "Esign Pro", version: "v5.0", status: "Signed", color: "text-green-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "No Revoke • 1 Year", link: "https://api.khoindvn.eu.org/k1Ycos" },
+                { title: "Esign Plus", version: "v4.8", status: "Signed", color: "text-green-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "Stable Certificate", link: "https://api.khoindvn.io.vn/jA06Dp" },
+                { title: "Esign Pro", version: "v5.0", status: "Signed", color: "text-green-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "No Revoke • 1 Year", link: "https://api.khoindvn.io.vn/SUvkkC" },
+                { title: "Esign Plus", version: "v4.8", status: "Signed", color: "text-green-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "Stable Certificate", link: "https://api.khoindvn.io.vn/qylEe1" },
+                { title: "Esign Pro", version: "v5.0", status: "Signed", color: "text-green-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "No Revoke • 1 Year", link: "https://api.khoindvn.io.vn/yHH6NE" },
+                { title: "Esign Plus", version: "v4.8", status: "Signed", color: "text-green-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "Stable Certificate", link: "https://api.khoindvn.io.vn/SXgmxb" },
+                { title: "Esign Pro", version: "v5.0", status: "Signed", color: "text-green-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "No Revoke • 1 Year", link: "https://api.khoindvn.io.vn/7SxrmH" },
+                { title: "Esign Plus", version: "v4.8", status: "Signed", color: "text-green-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "Stable Certificate", link: "https://api.khoindvn.io.vn/KX3VBb" },
+                { title: "Esign Pro", version: "v5.0", status: "Signed", color: "text-green-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "No Revoke • 1 Year", link: "https://api.khoindvn.io.vn/u9v6lH" },
+                { title: "Esign Plus", version: "v4.8", status: "Signed", color: "text-green-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "Stable Certificate", link: "https://api.khoindvn.io.vn/rR9jps" },
+                { title: "Esign Pro", version: "v5.0", status: "Signed", color: "text-green-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "No Revoke • 1 Year", link: "https://api.khoindvn.io.vn/DoD29p" },
+                { title: "Esign Plus", version: "v4.8", status: "Signed", color: "text-green-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "Stable Certificate", link: "https://api.khoindvn.io.vn/OuUeFv" }, 
+            ]
+        };
+
+        const ksign = {
+            ksign: [
+                { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/WAF9IA" },
+                { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/5PwyVy" },
+                { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/7wr6sg" },
+                { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/D6q5cE" },
+                { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/1IBMon" },
+                { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/vOqZNm" },
+                { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/uFdLFw" },
+                { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/7FRSgi" },
+                { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/Qih0uw" },
+                { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/PtRcts" },
+                { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/B3LYHy" },
+                { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/6rkpFX" },
+                { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/xBQ9Fm" },
+                { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/5PdaWQ" },
+                { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/QC273L" },
+                { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/QC273L" },
+            ]
+        };
+
+        const roblox = {
+            roblox: [
+                { title: "Delta Executor", version: "v2.645", status: "Updated", color: "text-purple-400", img: "https://deltaios-executor.com/Icon.jpg", desc: "Keyless • No Crash", link: "itms-services://?action=download-manifest&url=https%3A%2F%2Fdeltaios-executor.com%2FInstall21.plist" },
+                { title: "Krnl Executor", version: "v2.645", status: "Updated", color: "text-purple-400", img: "https://krnl-ios.com/unnamed.png", desc: "Keyless • No Crash", link: "itms-services://?action=download-manifest&url=https://krnl-ios.com/Install2.plist" }
+            ]
+        };
+
+        const trollstore = {
+            troll: [
+                { title: "TrollStore ", version: "Perm", status: "System", color: "text-blue-400", img: "https://i.pinimg.com/474x/1c/d7/04/1cd7044b82d9ef32d1830008a262e747.jpg", desc: "iOS 15 - 17.0", link: "https://github.com/JJTech0130/TrollRestore/releases/download/1.0/TrollRestore.exe" },
+                { title: "Certificate-Khoindvn ", version: "Perm", status: "System", color: "text-blue-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "Spp all Phone", link: "https://github.com/esigncert/khoindvn/raw/refs/heads/main/document/DNS/Certs-Khoindvn.zip" },
+                { title: "Certificate-Esign", version: "Perm", status: "System", color: "text-blue-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "Spp all Phone", link: "https://github.com/esigncert/khoindvn/raw/refs/heads/main/document/DNS/Certs-Khoindvn.zip" },
+            ]
+        };
+
+        const DB = { ...Esign, ...ksign, ...roblox, ...trollstore };
+
+        // --- LOGIC ---
+        let currentCategory = 'esign';
+        let isMenuOpen = false;
+        const menu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+
+        window.onload = () => {
+            renderCards('esign');
+            incrementViews();
+        };
+
+        // FIXED: Frontend-only View Counter (using LocalStorage)
+        function incrementViews() {
+            const counterElement = document.getElementById('view-counter');
+            
+            // Generate a random starting number for "hacking/hub" vibes if not found
+            let currentCount = localStorage.getItem('nhoy_views');
+            if (!currentCount) {
+                // Random number between 5000 and 9999
+                currentCount = Math.floor(Math.random() * (9999 - 5000 + 1) + 5000);
+            }
+            
+            // Add 1 visit
+            let newCount = parseInt(currentCount) + 1;
+            
+            // Save to browser storage
+            localStorage.setItem('nhoy_views', newCount);
+            
+            // Update display
+            if(counterElement) {
+                counterElement.innerText = newCount.toLocaleString();
+            }
+        }
+
+        function toggleMenu() {
+            isMenuOpen = !isMenuOpen;
+            if(isMenuOpen) { 
+                menu.classList.remove('menu-hidden'); 
+                menu.classList.add('menu-visible'); 
+                menuIcon.classList.replace('fa-bars-staggered', 'fa-xmark'); 
+            } else { 
+                menu.classList.remove('menu-visible'); 
+                menu.classList.add('menu-hidden'); 
+                menuIcon.classList.replace('fa-xmark', 'fa-bars-staggered'); 
+            }
+        }
+
+        function selectCategory(cat, btnElement) {
+            currentCategory = cat;
+            renderCards(cat);
+
+            document.querySelectorAll('.menu-item').forEach(b => b.classList.remove('active'));
+            if(btnElement && btnElement.classList.contains('menu-item')) btnElement.classList.add('active');
+
+            if(btnElement && btnElement.classList.contains('nav-btn-d')) {
+                document.querySelectorAll('.nav-btn-d').forEach(b => b.className = "nav-btn-d px-5 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-all");
+                btnElement.className = "nav-btn-d px-5 py-2 rounded-lg text-sm font-medium transition-all bg-white/10 text-white shadow-sm";
+            }
+
+            document.querySelectorAll('.chip-btn').forEach(b => {
+                b.className = "chip-btn snap-center shrink-0 pl-2 pr-6 py-2 rounded-full border border-white/10 text-sm font-bold whitespace-nowrap transition-all flex items-center gap-3 text-gray-400 hover:text-white hover:bg-white/5";
+                if(b.innerText.toLowerCase().includes(cat === 'troll' ? 'trollstore' : cat) || (cat === 'esign' && b.innerText.includes('ESIGN'))) {
+                    b.className = "chip-btn active snap-center shrink-0 pl-2 pr-6 py-2 rounded-full border border-white/10 text-sm font-bold whitespace-nowrap transition-all flex items-center gap-3 bg-white/10 text-white hover:bg-white/15";
+                }
+            });
+
+            if(isMenuOpen) toggleMenu();
+        }
+
+        function renderCards(cat) {
+            const container = document.getElementById('grid-container');
+            const items = DB[cat] || [];
+            container.innerHTML = '';
+            if(items.length === 0) { container.innerHTML = `<div class="col-span-full text-center py-20 text-gray-500">No items available.</div>`; return; }
+            items.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = `glass-card rounded-2xl p-3 flex items-center gap-4 relative group overflow-hidden fade-in-up hover:border-primary/50 transition duration-300`;
+                card.style.animationDelay = `${index * 100}ms`;
+                
+                card.innerHTML = `
+                    <div class="relative w-14 h-14 shrink-0 rounded-xl overflow-hidden shadow-lg border border-white/10">
+                        <img src="${item.img}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500">
+                    </div>
+                    <div class="flex-1 min-w-0 flex flex-col justify-center">
+                        <div class="flex items-center gap-2 mb-0.5">
+                            <h3 class="text-base font-bold text-white leading-none">${item.title}</h3>
+                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-white/10 ${item.color} border border-white/5 whitespace-nowrap">${item.status}</span>
+                        </div>
+                        <p class="text-xs text-gray-400 font-khmer truncate">${item.desc}</p>
+                        <span class="text-[10px] text-gray-500 font-mono mt-1">${item.version}</span>
+                    </div>
+                    <button onclick="openLocker('${item.link}', '${item.title}', '${item.img}')" class="w-10 h-10 rounded-full bg-white/5 text-primary border border-white/10 flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-lg shrink-0">
+                        <i class="fa-solid fa-download text-sm"></i>
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        let currentLink = ''; let currentAppImg = ''; 
+        const modal = document.getElementById('locker-modal'); const backdrop = document.getElementById('locker-backdrop'); const content = document.getElementById('locker-content'); const actionArea = document.getElementById('action-area'); const lockerIcon = document.getElementById('locker-icon');
+        
+        function openLocker(link, title, img) { 
+            currentLink = link; 
+            currentAppImg = img; 
+            document.getElementById('locker-app-name').innerText = title; 
+            modal.classList.remove('hidden'); 
+            setTimeout(() => { backdrop.classList.remove('opacity-0'); content.classList.remove('opacity-0', 'scale-95'); content.classList.add('scale-100'); }, 10); 
+            showStep(1); 
+        }
+        
+        function closeLocker() { 
+            backdrop.classList.add('opacity-0'); 
+            content.classList.remove('scale-100'); 
+            content.classList.add('opacity-0', 'scale-95'); 
+            setTimeout(() => modal.classList.add('hidden'), 300); 
+        }
+        
+        function showStep(step) {
+            const d1 = document.getElementById('dot-1'); const d2 = document.getElementById('dot-2'); const d3 = document.getElementById('dot-3');
+            [d1, d2, d3].forEach(d => { d.className = "w-8 h-8 rounded-full bg-[#1a1a1a] text-gray-500 border border-white/10 flex items-center justify-center text-xs font-bold ring-4 ring-[#0a0a0a] transition-all"; if(d === d3) d.innerHTML = '<i class="fa-solid fa-lock text-[10px]"></i>'; });
+            
+            if(step === 1) { 
+                lockerIcon.src = "https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg"; 
+                d1.className = "w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold ring-4 ring-primary/20 transition-all shadow-[0_0_15px_rgba(99,102,241,0.5)]"; 
+                d1.innerHTML = "1"; 
+                actionArea.innerHTML = `<button onclick="processStep(1)" class="w-full py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-500 text-white font-bold hover:shadow-lg hover:shadow-red-500/30 transition flex items-center justify-center gap-2 group"><i class="fa-brands fa-youtube group-hover:scale-110 transition"></i> Subscribe Channel</button>`; 
+            }
+            else if (step === 2) { 
+                lockerIcon.src = "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg"; 
+                d1.className = "w-8 h-8 rounded-full bg-emerald-500 text-black flex items-center justify-center text-xs font-bold ring-4 ring-[#0a0a0a]"; d1.innerHTML = '<i class="fa-solid fa-check"></i>'; 
+                d2.className = "w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-bold ring-4 ring-blue-500/20 transition-all shadow-[0_0_15px_rgba(59,130,246,0.5)]"; d2.innerHTML = "2"; 
+                actionArea.innerHTML = `<button onclick="processStep(2)" class="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-400 text-white font-bold hover:shadow-lg hover:shadow-blue-500/30 transition flex items-center justify-center gap-2 group"><i class="fa-brands fa-telegram group-hover:scale-110 transition"></i> Join Telegram</button>`; 
+            }
+            else if (step === 3) { 
+                lockerIcon.src = currentAppImg; 
+                d1.innerHTML = '<i class="fa-solid fa-check"></i>'; d1.classList.add('bg-emerald-500', 'text-black'); 
+                d2.innerHTML = '<i class="fa-solid fa-check"></i>'; d2.classList.add('bg-emerald-500', 'text-black'); 
+                d3.className = "w-8 h-8 rounded-full bg-white text-black flex items-center justify-center text-xs font-bold ring-4 ring-white/20 shadow-[0_0_20px_rgba(255,255,255,0.3)]"; d3.innerHTML = '<i class="fa-solid fa-unlock"></i>'; 
+                actionArea.innerHTML = `<a href="${currentLink}" target="_blank" class="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-accent text-white font-bold hover:scale-[1.02] transition flex items-center justify-center gap-2 shadow-xl shadow-primary/30"><i class="fa-solid fa-cloud-arrow-down"></i> Download Now</a>`; 
+            }
+        }
+        
+        function processStep(step) { 
+            const btn = actionArea.querySelector('button'); 
+            btn.disabled = true; 
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Checking...'; 
+            
+            if(step === 1) window.open('https://www.youtube.com/@xai-qq?si=uPsNoogH7OaNU__O', '_blank'); 
+            if(step === 2) window.open('https://t.me/nhoy200', '_blank'); 
+            
+            setTimeout(() => showStep(step + 1), 3000); 
+        }
+        
+        function resetView() { window.scrollTo({top: 0, behavior: 'smooth'}); selectCategory('esign'); }
+    </script>
+</body>
+</html>
