@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NhoyHub Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: { bg: '#050510', glass: 'rgba(255, 255, 255, 0.05)', primary: '#6366f1' }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #050510; color: white; }
+        .glass-panel {
+            background: rgba(15, 20, 35, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 relative">
+
+    <!-- Background -->
+    <div class="fixed inset-0 -z-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+    <div class="fixed top-0 left-0 w-96 h-96 bg-primary/20 rounded-full blur-[100px] -z-10"></div>
+
+    <!-- LOGIN SECTION -->
+    <div id="login-section" class="w-full max-w-md glass-panel rounded-2xl p-8 shadow-2xl">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold">Admin Access</h1>
+            <p class="text-gray-400 text-sm">Enter password to manage NhoyHub</p>
+        </div>
+        <div class="space-y-4">
+            <input type="password" id="admin-pass" placeholder="Enter Password" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary transition">
+            <button onclick="doLogin()" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-primary/20">Login</button>
+            <p id="login-msg" class="text-center text-red-500 text-sm h-5"></p>
+        </div>
+    </div>
+
+    <!-- DASHBOARD SECTION (Hidden by default) -->
+    <div id="dashboard-section" class="hidden w-full max-w-4xl">
+        <div class="flex items-center justify-between mb-8">
+            <h1 class="text-3xl font-bold">Dashboard</h1>
+            <button onclick="logout()" class="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2 rounded-lg text-sm font-bold transition">Logout</button>
+        </div>
+
+        <!-- Stats Card -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="glass-panel p-6 rounded-2xl flex items-center justify-between">
+                <div>
+                    <p class="text-gray-400 text-sm">Total Views</p>
+                    <h2 id="live-views" class="text-4xl font-bold text-white mt-1">...</h2>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-eye"></i>
+                </div>
+            </div>
+            
+            <div class="glass-panel p-6 rounded-2xl flex items-center justify-between border-red-500/20">
+                <div>
+                    <p class="text-gray-400 text-sm">Management</p>
+                    <h2 class="text-xl font-bold text-white mt-1">Reset Counter</h2>
+                </div>
+                <button onclick="resetViews()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold transition shadow-lg shadow-red-600/20">
+                    Clear Views
+                </button>
+            </div>
+        </div>
+
+        <!-- Placeholder for Planner/Content Admin -->
+        <div class="glass-panel p-6 rounded-2xl opacity-50 cursor-not-allowed">
+            <h3 class="text-lg font-bold mb-4">Planner / Content Manager (Coming Soon)</h3>
+            <p class="text-gray-400 text-sm mb-4">This section will allow you to add/edit Esign, Ksign, and Roblox apps directly from here.</p>
+            <div class="h-32 bg-white/5 rounded-xl border border-white/5 flex items-center justify-center border-dashed">
+                <span class="text-gray-500">Database Integration Required</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://127.0.0.1:5000/api";
+        let authToken = localStorage.getItem('nhoy_admin_pass');
+
+        // Check if already logged in
+        if(authToken) {
+            verifyToken();
+        }
+
+        async function verifyToken() {
+            try {
+                const res = await fetch(`${API_URL}/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: authToken })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    showDashboard();
+                } else {
+                    logout();
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function doLogin() {
+            const pass = document.getElementById('admin-pass').value;
+            const msg = document.getElementById('login-msg');
+            msg.innerText = "Checking...";
+            
+            try {
+                const res = await fetch(`${API_URL}/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pass })
+                });
+                const data = await res.json();
+                
+                if(data.success) {
+                    localStorage.setItem('nhoy_admin_pass', pass);
+                    authToken = pass;
+                    showDashboard();
+                } else {
+                    msg.innerText = "Incorrect Password";
+                }
+            } catch (err) {
+                msg.innerText = "Server Error (Is Python running?)";
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.remove('hidden');
+            fetchStats();
+            setInterval(fetchStats, 5000); // Auto refresh stats every 5s
+        }
+
+        async function fetchStats() {
+            try {
+                const res = await fetch(`${API_URL}/stats`);
+                const data = await res.json();
+                document.getElementById('live-views').innerText = data.count.toLocaleString();
+            } catch(e) { console.log(e); }
+        }
+
+        async function resetViews() {
+            if(!confirm("Are you sure you want to RESET ALL VIEWS to 0? This cannot be undone.")) return;
+
+            try {
+                const res = await fetch(`${API_URL}/admin/reset-views`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: authToken })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    alert("Success! Views have been cleared.");
+                    fetchStats();
+                } else {
+                    alert("Error: " + data.message);
+                }
+            } catch(e) { alert("Server Error"); }
+        }
+
+        function logout() {
+            localStorage.removeItem('nhoy_admin_pass');
+            location.reload();
+        }
+    </script>
+</body>
+</html>

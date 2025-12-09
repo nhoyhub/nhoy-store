@@ -237,6 +237,9 @@
     </div>
 
     <script>
+        // --- ADDED: API URL CONSTANT ---
+        const API_URL = "http://127.0.0.1:5000/api";
+
         // --- DATA ---
         const Esign = {
             esign: [
@@ -304,27 +307,26 @@
             incrementViews();
         };
 
-        // FIXED: Frontend-only View Counter (using LocalStorage)
+        // --- UPDATED: Use API_URL constant ---
         function incrementViews() {
             const counterElement = document.getElementById('view-counter');
             
-            // Generate a random starting number for "hacking/hub" vibes if not found
-            let currentCount = localStorage.getItem('nhoy_views');
-            if (!currentCount) {
-                // Random number between 5000 and 9999
-                currentCount = Math.floor(Math.random() * (9999 - 5000 + 1) + 5000);
-            }
-            
-            // Add 1 visit
-            let newCount = parseInt(currentCount) + 1;
-            
-            // Save to browser storage
-            localStorage.setItem('nhoy_views', newCount);
-            
-            // Update display
-            if(counterElement) {
-                counterElement.innerText = newCount.toLocaleString();
-            }
+            // Call the Python Backend at http://127.0.0.1:5000/api/visit
+            fetch(`${API_URL}/visit`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(counterElement && data.count) {
+                    counterElement.innerText = data.count.toLocaleString();
+                } else {
+                     counterElement.innerText = "Error";
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching views:', error);
+                counterElement.innerText = "Offline";
+            });
         }
 
         function toggleMenu() {
