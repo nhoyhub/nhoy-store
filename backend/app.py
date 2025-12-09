@@ -13,6 +13,7 @@ CORS(app)
 MONGO_URI = os.getenv("MONGO_URI")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
+# Initialize DB variables
 db = None
 views_collection = None
 
@@ -31,10 +32,9 @@ if MONGO_URI:
 def home():
     return "NhoyHub API is Running!"
 
-# 1. API សម្រាប់ User ធម្មតា (រាប់ View)
+# 1. API for User Visit (Increment Count)
 @app.route("/api/visit", methods=["POST"])
 def add_view():
-    # FIXED: ប្រើ is None ជំនួស if not
     if views_collection is None: 
         return jsonify({"count": 0})
     
@@ -47,13 +47,11 @@ def add_view():
         )
         return jsonify({"count": updated["count"]})
     except Exception as e:
-        print(f"Error adding view: {e}")
         return jsonify({"error": str(e)}), 500
 
-# 2. API សម្រាប់យកចំនួន View (មិនបូកថែម) - សម្រាប់ Admin Dashboard
+# 2. API for Admin Dashboard (Get Count Only)
 @app.route("/api/stats", methods=["GET"])
 def get_stats():
-    # FIXED: ប្រើ is None ជំនួស if not
     if views_collection is None: 
         return jsonify({"count": 0})
     
@@ -62,25 +60,21 @@ def get_stats():
         count = doc["count"] if doc else 0
         return jsonify({"count": count})
     except Exception as e:
-        print(f"Error getting stats: {e}")
         return jsonify({"error": str(e)}), 500
 
-# 3. API សម្រាប់ Reset Views (ត្រូវការ Password)
+# 3. API to Reset Views to 0
 @app.route("/api/admin/reset-views", methods=["POST"])
 def reset_views():
-    # FIXED: ប្រើ is None
     if views_collection is None:
         return jsonify({"success": False, "message": "Database disconnected"}), 500
 
     data = request.json
     password = data.get("password")
 
-    # ឆែក Password
     if password != ADMIN_PASSWORD:
         return jsonify({"success": False, "message": "Incorrect Password!"}), 401
 
     try:
-        # Reset ទៅ 0
         views_collection.update_one(
             {"_id": "global_counter"},
             {"$set": {"count": 0}},
@@ -90,7 +84,7 @@ def reset_views():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
-# 4. API សម្រាប់ Login Check
+# 4. API to Check Login
 @app.route("/api/admin/login", methods=["POST"])
 def login():
     data = request.json
@@ -98,5 +92,36 @@ def login():
         return jsonify({"success": True})
     return jsonify({"success": False}), 401
 
+# 5. NEW API: Manually Set View Count
+@app.route("/api/admin/update-views", methods=["POST"])
+def update_view_count():
+    if views_collection is None:
+        return jsonify({"success": False, "message": "Database disconnected"}), 500
+
+    data = request.json
+    password = data.get("password")
+    new_count = data.get("new_count")
+
+    # Check Password
+    if password != ADMIN_PASSWORD:
+        return jsonify({"success": False, "message": "Incorrect Password!"}), 401
+
+    # Validate Input
+    if new_count is None:
+         return jsonify({"success": False, "message": "No number provided"}), 400
+
+    try:
+        # Update the count to the specific number
+        views_collection.update_one(
+            {"_id": "global_counter"},
+            {"$set": {"count": int(new_count)}},
+            upsert=True
+        )
+        return jsonify({"success": True, "message": f"Views updated to {new_count}"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    # IMPORTANT: Use the PORT environment variable for Render
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)

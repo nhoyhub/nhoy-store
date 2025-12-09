@@ -38,6 +38,8 @@
             border-color: #6366f1;
             outline: none;
         }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
@@ -89,7 +91,7 @@
 
         <!-- Stats Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <!-- Total Views Card -->
+            <!-- 1. Total Views Card -->
             <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
                 <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition">
                     <i class="fa-solid fa-eye text-6xl"></i>
@@ -97,58 +99,60 @@
                 <p class="text-gray-400 text-sm font-medium">Total Visits</p>
                 <h2 id="live-views" class="text-5xl font-bold text-white mt-2 tracking-tight">---</h2>
                 <div class="mt-4 text-xs text-gray-500 flex items-center gap-1">
-                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Live updating from DB
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Live updating
                 </div>
             </div>
 
-            <!-- Management Card -->
+            <!-- 2. Edit Views Card (NEW) -->
+            <div class="glass-panel p-6 rounded-2xl flex flex-col justify-between border-l-4 border-l-purple-500">
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-1">Edit Views</h3>
+                    <p class="text-gray-400 text-xs mb-3">Manually set the visitor count.</p>
+                    <input type="number" id="manual-view-input" placeholder="Enter number..." 
+                        class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500 transition-colors font-mono text-sm">
+                </div>
+                <button onclick="updateCustomViews()" class="mt-4 w-full bg-purple-500/10 border border-purple-500/20 text-purple-400 hover:bg-purple-500 hover:text-white py-3 rounded-xl font-bold transition text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i> Update Count
+                </button>
+            </div>
+
+            <!-- 3. Reset Data Card -->
             <div class="glass-panel p-6 rounded-2xl flex flex-col justify-between border-l-4 border-l-red-500">
                 <div>
                     <h3 class="text-lg font-bold text-white mb-1">Reset Data</h3>
-                    <p class="text-gray-400 text-xs">Clear all view counts from the database.</p>
+                    <p class="text-gray-400 text-xs">Clear all view counts to 0.</p>
                 </div>
                 <button onclick="resetViews()" class="mt-4 w-full bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white py-3 rounded-xl font-bold transition text-sm flex items-center justify-center gap-2">
                     <i class="fa-solid fa-trash-can"></i> Reset Counter
                 </button>
             </div>
-
-            <!-- Server Status -->
-            <div class="glass-panel p-6 rounded-2xl flex flex-col justify-between border-l-4 border-l-blue-500">
-                <div>
-                    <h3 class="text-lg font-bold text-white mb-1">Server Status</h3>
-                    <p class="text-gray-400 text-xs">Connection to Python Backend</p>
-                </div>
-                <div class="mt-4 flex items-center gap-3">
-                    <div id="status-dot" class="w-3 h-3 bg-red-500 rounded-full"></div>
-                    <span id="status-text" class="text-sm font-mono text-gray-300">Disconnected</span>
-                </div>
-            </div>
         </div>
 
-        <!-- Future Features (Placeholder) -->
-        <div class="glass-panel p-8 rounded-2xl text-center border-dashed border-2 border-white/10 opacity-60">
-            <i class="fa-solid fa-layer-group text-4xl text-gray-600 mb-3"></i>
-            <h3 class="text-xl font-bold text-gray-300">App Manager</h3>
-            <p class="text-sm text-gray-500 mb-4">Add or Edit Esign/Game Links (Coming Soon)</p>
-            <button disabled class="bg-white/5 text-gray-500 px-6 py-2 rounded-lg text-sm cursor-not-allowed">Manage Content</button>
+        <!-- Connection Status -->
+        <div class="glass-panel p-4 rounded-xl flex items-center justify-between opacity-70">
+            <span class="text-xs text-gray-400">Backend Connection Status:</span>
+            <div class="flex items-center gap-3">
+                <div id="status-dot" class="w-2 h-2 bg-red-500 rounded-full"></div>
+                <span id="status-text" class="text-xs font-mono text-gray-300">Checking...</span>
+            </div>
         </div>
     </div>
 
     <script>
         // --- CONFIGURATION ---
-        // ត្រូវប្រាកដថា backend/app.py កំពុង Run
         const API_URL = "https://nhoy-store.onrender.com/api";
+        // const API_URL = "http://127.0.0.1:5000/api"; // Un-comment for local testing
         
         let authToken = localStorage.getItem('nhoy_admin_pass');
 
-        // Check login on load
+        // Initial Load
         if(authToken) {
             verifyToken();
         } else {
              checkServerStatus();
         }
 
-        // 1. Verify Login Token
+        // 1. Verify Token
         async function verifyToken() {
             try {
                 const res = await fetch(`${API_URL}/admin/login`, {
@@ -161,23 +165,21 @@
                 if(data.success) {
                     showDashboard();
                 } else {
-                    logout(); // Invalid token
+                    logout();
                 }
             } catch(e) { 
-                console.error("Connection Error:", e);
                 document.getElementById('status-text').innerText = "Server Error";
             }
         }
 
-        // 2. Handle Login Button
+        // 2. Login Logic
         async function doLogin() {
             const pass = document.getElementById('admin-pass').value;
             const msg = document.getElementById('login-msg');
-            const btn = document.querySelector('button');
+            const btn = document.querySelector('#login-section button');
             
             if(!pass) return;
 
-            // Loading state
             msg.innerText = "";
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Checking...';
             
@@ -198,27 +200,26 @@
                     btn.innerHTML = '<i class="fa-solid fa-lock-open mr-2"></i> Login';
                 }
             } catch (err) {
-                msg.innerText = "Cannot connect to Backend (Is app.py running?)";
+                msg.innerText = "Connection Failed";
                 btn.innerHTML = '<i class="fa-solid fa-lock-open mr-2"></i> Login';
             }
         }
 
-        // 3. Show Dashboard & Start Fetching
+        // 3. Show Dashboard
         function showDashboard() {
             document.getElementById('login-section').classList.add('hidden');
             const dash = document.getElementById('dashboard-section');
             dash.classList.remove('hidden');
             
-            // Update Status
-            document.getElementById('status-dot').className = "w-3 h-3 bg-green-500 rounded-full shadow-[0_0_10px_#22c55e]";
-            document.getElementById('status-text').innerText = "Connected (127.0.0.1:5000)";
-            document.getElementById('status-text').className = "text-sm font-mono text-green-400";
+            document.getElementById('status-dot').className = "w-2 h-2 bg-green-500 rounded-full shadow-[0_0_10px_#22c55e]";
+            document.getElementById('status-text').innerText = "Connected";
+            document.getElementById('status-text').className = "text-xs font-mono text-green-400";
 
             fetchStats();
-            setInterval(fetchStats, 3000); // Auto refresh every 3s
+            setInterval(fetchStats, 5000); 
         }
 
-        // 4. Fetch Statistics
+        // 4. Fetch Stats
         async function fetchStats() {
             try {
                 const res = await fetch(`${API_URL}/stats`);
@@ -226,12 +227,49 @@
                 if(data.count !== undefined) {
                     document.getElementById('live-views').innerText = data.count.toLocaleString();
                 }
-            } catch(e) { console.log("Fetch error", e); }
+            } catch(e) { console.log("Fetch error"); }
         }
 
-        // 5. Reset Views
+        // 5. Update Custom Views (NEW FUNCTION)
+        async function updateCustomViews() {
+            const inputVal = document.getElementById('manual-view-input').value;
+            
+            if(!inputVal) {
+                alert("Please enter a number.");
+                return;
+            }
+
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
+
+            try {
+                const res = await fetch(`${API_URL}/admin/update-views`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        password: authToken,
+                        new_count: parseInt(inputVal)
+                    })
+                });
+                const data = await res.json();
+                
+                if(data.success) {
+                    document.getElementById('live-views').innerText = parseInt(inputVal).toLocaleString();
+                    document.getElementById('manual-view-input').value = "";
+                    alert("✅ Views updated!");
+                } else {
+                    alert("❌ Error: " + data.message);
+                }
+            } catch(e) { 
+                alert("Server connection error");
+            }
+            btn.innerHTML = originalText;
+        }
+
+        // 6. Reset Views
         async function resetViews() {
-            if(!confirm("⚠️ WARNING: Are you sure you want to delete ALL views? This cannot be undone.")) return;
+            if(!confirm("⚠️ Delete ALL views? This cannot be undone.")) return;
 
             try {
                 const res = await fetch(`${API_URL}/admin/reset-views`, {
@@ -241,28 +279,23 @@
                 });
                 const data = await res.json();
                 if(data.success) {
-                    alert("✅ Success! Counter reset to 0.");
+                    alert("✅ Counter reset to 0.");
                     fetchStats();
                 } else {
-                    alert("❌ Error: " + data.message);
+                    alert("Error: " + data.message);
                 }
             } catch(e) { alert("Server Error"); }
         }
 
-        // 6. Logout
+        // 7. Logout
         function logout() {
             localStorage.removeItem('nhoy_admin_pass');
             location.reload();
         }
 
-        // Helper: Just check if server is reachable (for login screen)
         async function checkServerStatus() {
-            try {
-                await fetch(`${API_URL}/stats`);
-                // If success, user just needs to login
-            } catch(e) {
-               document.getElementById('login-msg').innerText = "⚠️ Warning: Backend is OFFLINE";
-            }
+            try { await fetch(`${API_URL}/stats`); } 
+            catch(e) { document.getElementById('login-msg').innerText = "⚠️ Backend Offline"; }
         }
     </script>
 </body>
