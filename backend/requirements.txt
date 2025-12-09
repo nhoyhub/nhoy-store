@@ -5,3 +5,6 @@ Flask-Login
 Flask-WTF
 email_validator
 gunicorn
+Flask-Cors
+pymongo
+python-dotenv
