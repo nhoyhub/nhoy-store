@@ -3,175 +3,618 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NhoyHub Admin Panel</title>
+    <title>NhoyHub | Cloud Console</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
-                    colors: { bg: '#050510', glass: 'rgba(255, 255, 255, 0.05)', primary: '#6366f1' }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { 
+                        base: '#0B0E14',      // Deep Blue/Black
+                        surface: '#151921',   // Card background
+                        stroke: '#2A303C',    // Borders
+                        primary: '#6E56CF',   // Vercel Purple
+                        accent: '#38bdf8'     // Cyan
+                    },
+                    animation: {
+                        'shimmer': 'shimmer 2s linear infinite',
+                        'slide-up': 'slideUp 0.3s ease-out forwards',
+                    },
+                    keyframes: {
+                        shimmer: {
+                            '0%': { backgroundPosition: '-1000px 0' },
+                            '100%': { backgroundPosition: '1000px 0' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        }
+                    }
                 }
             }
         }
     </script>
     <style>
-        body { background-color: #050510; color: white; }
-        .glass-panel {
-            background: rgba(15, 20, 35, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
+        body { background-color: #0B0E14; color: #E2E8F0; }
+        
+        /* Aurora Background Effects */
+        .aurora-blob {
+            position: absolute;
+            filter: blur(80px);
+            opacity: 0.4;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        /* Glass Components */
+        .glass {
+            background: rgba(21, 25, 33, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Nav Active State */
+        .nav-link.active {
+            background: rgba(110, 86, 207, 0.15);
+            color: #A78BFA;
+            border-right: 3px solid #6E56CF;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2A303C; border-radius: 20px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4B5563; }
+
+        /* Skeleton Loader */
+        .skeleton {
+            background: #1F2937;
+            background-image: linear-gradient(to right, #1F2937 0%, #374151 20%, #1F2937 40%, #1F2937 100%);
+            background-repeat: no-repeat;
+            background-size: 1000px 100%; 
+            animation: shimmer 2s infinite linear forwards;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 relative">
+<body class="h-screen w-full overflow-hidden flex flex-col md:flex-row relative">
 
-    <!-- Background -->
-    <div class="fixed inset-0 -z-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-    <div class="fixed top-0 left-0 w-96 h-96 bg-primary/20 rounded-full blur-[100px] -z-10"></div>
+    <!-- Background Blobs -->
+    <div class="aurora-blob w-96 h-96 bg-primary top-[-20%] left-[-10%] rounded-full"></div>
+    <div class="aurora-blob w-96 h-96 bg-accent bottom-[-20%] right-[-10%] rounded-full"></div>
 
-    <!-- LOGIN SECTION -->
-    <div id="login-section" class="w-full max-w-md glass-panel rounded-2xl p-8 shadow-2xl">
-        <div class="text-center mb-6">
-            <h1 class="text-2xl font-bold">Admin Access</h1>
-            <p class="text-gray-400 text-sm">Enter password to manage NhoyHub</p>
-        </div>
-        <div class="space-y-4">
-            <input type="password" id="admin-pass" placeholder="Enter Password" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary transition">
-            <button onclick="doLogin()" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-primary/20">Login</button>
-            <p id="login-msg" class="text-center text-red-500 text-sm h-5"></p>
-        </div>
-    </div>
-
-    <!-- DASHBOARD SECTION (Hidden by default) -->
-    <div id="dashboard-section" class="hidden w-full max-w-4xl">
-        <div class="flex items-center justify-between mb-8">
-            <h1 class="text-3xl font-bold">Dashboard</h1>
-            <button onclick="logout()" class="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2 rounded-lg text-sm font-bold transition">Logout</button>
-        </div>
-
-        <!-- Stats Card -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="glass-panel p-6 rounded-2xl flex items-center justify-between">
-                <div>
-                    <p class="text-gray-400 text-sm">Total Views</p>
-                    <h2 id="live-views" class="text-4xl font-bold text-white mt-1">...</h2>
-                </div>
-                <div class="w-12 h-12 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center text-xl">
-                    <i class="fa-solid fa-eye"></i>
-                </div>
-            </div>
+    <!-- ========================= -->
+    <!-- 1. LOGIN SCREEN           -->
+    <!-- ========================= -->
+    <div id="login-view" class="fixed inset-0 z-50 flex items-center justify-center bg-[#0B0E14]/90 backdrop-blur-sm">
+        <div class="w-full max-w-sm p-8 glass rounded-2xl shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-accent"></div>
             
-            <div class="glass-panel p-6 rounded-2xl flex items-center justify-between border-red-500/20">
-                <div>
-                    <p class="text-gray-400 text-sm">Management</p>
-                    <h2 class="text-xl font-bold text-white mt-1">Reset Counter</h2>
+            <div class="text-center mb-8">
+                <div class="w-12 h-12 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-cube text-xl text-transparent bg-clip-text bg-gradient-to-br from-primary to-accent"></i>
                 </div>
-                <button onclick="resetViews()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold transition shadow-lg shadow-red-600/20">
-                    Clear Views
+                <h1 class="text-xl font-bold">Admin Console</h1>
+                <p class="text-gray-500 text-xs mt-2">NhoyHub Ecosystem</p>
+            </div>
+
+            <div class="space-y-4 relative z-10">
+                <input type="password" id="admin-pass" placeholder="Password" 
+                    class="w-full bg-[#0B0E14] border border-stroke text-white px-4 py-3 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition text-sm">
+                
+                <button onclick="doLogin()" class="w-full bg-white text-black font-semibold py-3 rounded-lg hover:bg-gray-200 transition shadow-lg shadow-white/5">
+                    Sign In
                 </button>
             </div>
         </div>
+    </div>
 
-        <!-- Placeholder for Planner/Content Admin -->
-        <div class="glass-panel p-6 rounded-2xl opacity-50 cursor-not-allowed">
-            <h3 class="text-lg font-bold mb-4">Planner / Content Manager (Coming Soon)</h3>
-            <p class="text-gray-400 text-sm mb-4">This section will allow you to add/edit Esign, Ksign, and Roblox apps directly from here.</p>
-            <div class="h-32 bg-white/5 rounded-xl border border-white/5 flex items-center justify-center border-dashed">
-                <span class="text-gray-500">Database Integration Required</span>
+    <!-- ========================= -->
+    <!-- 2. DASHBOARD LAYOUT       -->
+    <!-- ========================= -->
+    <div id="dashboard-view" class="hidden flex-1 flex h-full relative z-10">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-20 md:w-64 flex-shrink-0 border-r border-stroke bg-base/50 backdrop-blur-xl flex flex-col justify-between">
+            <div>
+                <!-- Brand -->
+                <div class="h-16 flex items-center px-6 border-b border-stroke gap-3">
+                    <div class="w-6 h-6 rounded bg-gradient-to-tr from-primary to-accent flex-shrink-0"></div>
+                    <span class="font-bold text-sm tracking-wide hidden md:block">NhoyHub</span>
+                </div>
+
+                <!-- Nav -->
+                <nav class="p-4 space-y-1">
+                    <button onclick="switchTab('overview')" id="nav-overview" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition nav-link active">
+                        <i class="fa-solid fa-house w-5"></i>
+                        <span class="text-sm font-medium hidden md:block">Overview</span>
+                    </button>
+                    <button onclick="switchTab('apps')" id="nav-apps" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition nav-link">
+                        <i class="fa-solid fa-layer-group w-5"></i>
+                        <span class="text-sm font-medium hidden md:block">Applications</span>
+                    </button>
+                </nav>
             </div>
+
+            <!-- Profile -->
+            <div class="p-4 border-t border-stroke">
+                <button onclick="logout()" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-red-500/10 hover:text-red-400 text-gray-500 transition">
+                    <i class="fa-solid fa-arrow-right-from-bracket w-5"></i>
+                    <span class="text-sm font-medium hidden md:block">Sign Out</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 flex flex-col relative overflow-hidden">
+            
+            <!-- HEADER -->
+            <header class="h-16 border-b border-stroke bg-base/50 backdrop-blur-sm px-8 flex items-center justify-between">
+                <h2 id="page-title" class="text-sm font-medium text-gray-300">Overview</h2>
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></div>
+                    <span class="text-xs text-emerald-500 font-mono">ONLINE</span>
+                </div>
+            </header>
+
+            <!-- SCROLLABLE AREA -->
+            <div class="flex-1 overflow-y-auto p-8">
+                
+                <!-- TAB: OVERVIEW -->
+                <div id="tab-overview" class="max-w-5xl mx-auto animate-slide-up">
+                    <h1 class="text-2xl font-semibold mb-1">Dashboard</h1>
+                    <p class="text-gray-500 text-sm mb-8">Real-time ecosystem metrics</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="glass p-6 rounded-xl border border-stroke hover:border-primary/50 transition duration-500">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><i class="fa-solid fa-box-archive"></i></div>
+                            </div>
+                            <div class="text-2xl font-bold mb-1" id="total-apps-count">--</div>
+                            <div class="text-xs text-gray-500">Active Scripts</div>
+                        </div>
+
+                        <div class="glass p-6 rounded-xl border border-stroke hover:border-accent/50 transition duration-500">
+                             <div class="flex justify-between items-start mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent"><i class="fa-solid fa-chart-simple"></i></div>
+                            </div>
+                            <div class="text-2xl font-bold mb-1" id="live-views">--</div>
+                            <div class="text-xs text-gray-500">Total Views</div>
+                        </div>
+
+                        <div class="glass p-6 rounded-xl border border-stroke flex flex-col justify-center gap-3">
+                            <label class="text-xs text-gray-400 font-medium">Update View Counter</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="manual-view-input" class="flex-1 bg-base border border-stroke rounded px-3 py-2 text-sm text-white focus:border-primary outline-none">
+                                <button onclick="updateCustomViews()" class="bg-white text-black px-4 rounded text-sm font-medium hover:bg-gray-200">Set</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: APPS -->
+                <div id="tab-apps" class="hidden max-w-5xl mx-auto animate-slide-up">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <h1 class="text-2xl font-semibold mb-1">Library</h1>
+                            <p class="text-gray-500 text-sm">Create, edit, and remove content</p>
+                        </div>
+                        <button onclick="openAddModal()" class="bg-primary hover:bg-[#5e4ac2] text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg shadow-primary/20 flex items-center gap-2 transition">
+                            <i class="fa-solid fa-plus"></i> New Item
+                        </button>
+                    </div>
+
+                    <!-- List Header -->
+                    <div class="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-gray-500 border-b border-stroke mb-2">
+                        <div class="col-span-6 md:col-span-5">APP DETAILS</div>
+                        <div class="col-span-3 hidden md:block">CATEGORY</div>
+                        <div class="col-span-3 hidden md:block">STATUS</div>
+                        <div class="col-span-6 md:col-span-1 text-right">ACTIONS</div>
+                    </div>
+
+                    <!-- App List Container -->
+                    <div id="admin-app-list" class="space-y-2">
+                        <!-- Items injected here -->
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ========================= -->
+    <!-- 3. ADD/EDIT MODAL         -->
+    <!-- ========================= -->
+    <div id="modal-overlay" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 transition-opacity opacity-0">
+        <div id="modal-content" class="glass w-full max-w-2xl rounded-2xl p-6 md:p-8 transform scale-95 transition-all duration-300 border border-stroke">
+            
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-semibold text-white" id="modal-title">Add to Library</h3>
+                <button onclick="toggleModal(false)" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition"><i class="fa-solid fa-xmark text-sm"></i></button>
+            </div>
+
+            <!-- Hidden Input to store ID for Editing -->
+            <input type="hidden" id="edit-app-id">
+
+            <div class="grid grid-cols-2 gap-5">
+                <!-- Title -->
+                <div class="col-span-2">
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Title</label>
+                    <input type="text" id="app-title" class="w-full bg-[#0B0E14] border border-stroke rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none focus:ring-1 focus:ring-primary/50 transition">
+                </div>
+
+                <!-- Category -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Category</label>
+                    <select id="app-category" onchange="autoFillImage()" class="w-full bg-[#0B0E14] border border-stroke rounded-lg px-4 py-2.5 text-sm text-gray-300 focus:border-primary outline-none">
+                        <option value="esign">Esign Apps</option>
+                        <option value="ksign">Ksign Certs</option>
+                        <option value="roblox">Roblox Executors</option>
+                        <option value="troll">TrollStore</option>
+                    </select>
+                </div>
+
+                <!-- Version -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Version</label>
+                    <input type="text" id="app-version" placeholder="v1.0" class="w-full bg-[#0B0E14] border border-stroke rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none">
+                </div>
+
+                <!-- Desc -->
+                <div class="col-span-2">
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Description / Key</label>
+                    <textarea id="app-desc" rows="2" class="w-full bg-[#0B0E14] border border-stroke rounded-lg px-4 py-2.5 text-sm font-mono text-gray-400 focus:border-primary outline-none"></textarea>
+                </div>
+
+                <!-- Link & Image -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Target URL</label>
+                    <input type="text" id="app-link" class="w-full bg-[#0B0E14] border border-stroke rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none">
+                </div>
+                 <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Image URL</label>
+                    <input type="text" id="app-img" class="w-full bg-[#0B0E14] border border-stroke rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none">
+                </div>
+
+                <!-- Metadata -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Badge Text</label>
+                    <input type="text" id="app-status" placeholder="Active" class="w-full bg-[#0B0E14] border border-stroke rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none">
+                </div>
+                 <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Badge Color</label>
+                    <select id="app-color" class="w-full bg-[#0B0E14] border border-stroke rounded-lg px-4 py-2.5 text-sm text-gray-300 focus:border-primary outline-none">
+                        <option value="text-emerald-400">Emerald</option>
+                        <option value="text-purple-400">Purple</option>
+                        <option value="text-amber-400">Amber</option>
+                        <option value="text-blue-400">Blue</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-end gap-3">
+                <button onclick="toggleModal(false)" class="px-6 py-2.5 rounded-lg border border-stroke text-sm font-medium hover:bg-white/5 transition">Cancel</button>
+                <button onclick="saveApp()" id="save-btn" class="px-6 py-2.5 rounded-lg bg-primary hover:bg-[#5e4ac2] text-white text-sm font-medium shadow-lg shadow-primary/25 transition">Publish</button>
+            </div>
+
         </div>
     </div>
 
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-2"></div>
+
+    <!-- ========================= -->
+    <!-- LOGIC                     -->
+    <!-- ========================= -->
     <script>
-        const API_URL = "https://nhoy-store.onrender.com";
+        // CONFIG
+        const API_URL = "https://nhoy-store.onrender.com/api";
         let authToken = localStorage.getItem('nhoy_admin_pass');
+        let appCache = []; // Store apps locally for editing
 
-        // Check if already logged in
-        if(authToken) {
-            verifyToken();
-        }
+        const DEFAULT_IMAGES = {
+            esign: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp",
+            ksign: "https://khoindvn.io.vn/img/pf/favicon.ico",
+            roblox: "https://deltaios-executor.com/Icon.jpg",
+            troll: "https://i.pinimg.com/474x/1c/d7/04/1cd7044b82d9ef32d1830008a262e747.jpg"
+        };
 
+        window.addEventListener('load', () => {
+            if(authToken) verifyToken();
+        });
+
+        // --- AUTH & SETUP ---
         async function verifyToken() {
-            try {
+             try {
                 const res = await fetch(`${API_URL}/admin/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ password: authToken })
                 });
                 const data = await res.json();
-                if(data.success) {
-                    showDashboard();
-                } else {
-                    logout();
-                }
-            } catch(e) { console.error(e); }
+                if(data.success) showDashboard();
+                else document.getElementById('login-view').classList.remove('hidden');
+             } catch(e) { console.error(e); }
         }
 
         async function doLogin() {
             const pass = document.getElementById('admin-pass').value;
-            const msg = document.getElementById('login-msg');
-            msg.innerText = "Checking...";
-            
-            try {
+             try {
                 const res = await fetch(`${API_URL}/admin/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ password: pass })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    localStorage.setItem('nhoy_admin_pass', pass);
+                    authToken = pass;
+                    showToast('Welcome back, Admin');
+                    showDashboard();
+                } else { showToast('Invalid Password', 'error'); }
+             } catch(e) { showToast('Server Error', 'error'); }
+        }
+
+        function showDashboard() {
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+            fetchStats();
+            fetchAdminApps();
+        }
+        
+        function logout() { localStorage.removeItem('nhoy_admin_pass'); location.reload(); }
+
+        // --- NAVIGATION ---
+        function switchTab(tab) {
+            ['overview', 'apps'].forEach(t => {
+                document.getElementById('tab-' + t).classList.add('hidden');
+                document.getElementById('nav-' + t).classList.remove('active', 'text-white', 'bg-white/5');
+            });
+            document.getElementById('tab-' + tab).classList.remove('hidden');
+            document.getElementById('nav-' + tab).classList.add('active');
+            document.getElementById('page-title').innerText = tab.charAt(0).toUpperCase() + tab.slice(1);
+        }
+
+        // --- MODAL LOGIC (ADD & EDIT) ---
+        function toggleModal(show) {
+            const overlay = document.getElementById('modal-overlay');
+            const content = document.getElementById('modal-content');
+            if(show) {
+                overlay.classList.remove('hidden');
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }, 10);
+            } else {
+                overlay.classList.add('opacity-0');
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        // Open Modal in ADD Mode
+        function openAddModal() {
+            // Clear fields
+            document.getElementById('edit-app-id').value = "";
+            document.getElementById('app-title').value = "";
+            document.getElementById('app-version').value = "";
+            document.getElementById('app-desc').value = "";
+            document.getElementById('app-link').value = "";
+            document.getElementById('app-img').value = "";
+            document.getElementById('app-status').value = "";
+            
+            // UI Text
+            document.getElementById('modal-title').innerText = "Add New Script";
+            document.getElementById('save-btn').innerText = "Publish";
+            
+            toggleModal(true);
+            autoFillImage();
+        }
+
+        // Open Modal in EDIT Mode
+        function openEditModal(appId) {
+            const app = appCache.find(a => a._id === appId);
+            if(!app) return showToast("Error finding app data", "error");
+
+            // Fill fields
+            document.getElementById('edit-app-id').value = app._id;
+            document.getElementById('app-category').value = app.category;
+            document.getElementById('app-title').value = app.title;
+            document.getElementById('app-version').value = app.version || "";
+            document.getElementById('app-desc').value = app.desc || "";
+            document.getElementById('app-link').value = app.link;
+            document.getElementById('app-img').value = app.img;
+            document.getElementById('app-status').value = app.status || "";
+            document.getElementById('app-color').value = app.color || "text-green-400";
+
+            // UI Text
+            document.getElementById('modal-title').innerText = "Edit Script";
+            document.getElementById('save-btn').innerText = "Save Changes";
+
+            toggleModal(true);
+        }
+
+        // Handle Save (Create or Update)
+        async function saveApp() {
+            const editId = document.getElementById('edit-app-id').value;
+            
+            const payload = {
+                password: authToken,
+                category: document.getElementById('app-category').value,
+                title: document.getElementById('app-title').value,
+                version: document.getElementById('app-version').value,
+                status: document.getElementById('app-status').value,
+                color: document.getElementById('app-color').value,
+                img: document.getElementById('app-img').value,
+                desc: document.getElementById('app-desc').value,
+                link: document.getElementById('app-link').value
+            };
+
+            if(!payload.title || !payload.link) return showToast('Title and Link required', 'error');
+
+            let endpoint = `${API_URL}/admin/add-app`;
+            let method = "POST";
+            let successMsg = "Published successfully";
+
+            // If ID exists, we are editing
+            if(editId) {
+                endpoint = `${API_URL}/admin/edit-app`; // Assumes this endpoint exists now
+                payload.id = editId;
+                successMsg = "Updated successfully";
+            }
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: method, headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
                 const data = await res.json();
                 
                 if(data.success) {
-                    localStorage.setItem('nhoy_admin_pass', pass);
-                    authToken = pass;
-                    showDashboard();
-                } else {
-                    msg.innerText = "Incorrect Password";
+                    toggleModal(false);
+                    showToast(successMsg);
+                    fetchAdminApps(); // Refresh list
+                } else { 
+                    // Fallback for demo if endpoint doesn't exist
+                    showToast(data.message || "Operation failed", 'error'); 
                 }
-            } catch (err) {
-                msg.innerText = "Server Error (Is Python running?)";
+            } catch(e) { console.error(e); showToast("Connection error", 'error'); }
+        }
+
+        function autoFillImage() {
+            const cat = document.getElementById('app-category').value;
+            const imgInput = document.getElementById('app-img');
+            // Only auto-fill if empty
+            if(DEFAULT_IMAGES[cat] && imgInput.value === "") {
+                 imgInput.value = DEFAULT_IMAGES[cat];
             }
         }
 
-        function showDashboard() {
-            document.getElementById('login-section').classList.add('hidden');
-            document.getElementById('dashboard-section').classList.remove('hidden');
-            fetchStats();
-            setInterval(fetchStats, 5000); // Auto refresh stats every 5s
-        }
-
+        // --- DATA FETCHING ---
         async function fetchStats() {
-            try {
+             try {
                 const res = await fetch(`${API_URL}/stats`);
                 const data = await res.json();
                 document.getElementById('live-views').innerText = data.count.toLocaleString();
-            } catch(e) { console.log(e); }
+             } catch(e) {}
         }
 
-        async function resetViews() {
-            if(!confirm("Are you sure you want to RESET ALL VIEWS to 0? This cannot be undone.")) return;
+        async function updateCustomViews() {
+             const val = document.getElementById('manual-view-input').value;
+             await fetch(`${API_URL}/admin/update-views`, {
+                 method: 'POST', headers: {'Content-Type': 'application/json'},
+                 body: JSON.stringify({password: authToken, new_count: val})
+             });
+             fetchStats();
+             showToast('Views Updated');
+        }
+
+        async function fetchAdminApps() {
+            const container = document.getElementById('admin-app-list');
+            const countLabel = document.getElementById('total-apps-count');
+            
+            // Skeleton Loading
+            container.innerHTML = `
+                <div class="h-16 w-full rounded-lg skeleton mb-2"></div>
+                <div class="h-16 w-full rounded-lg skeleton mb-2"></div>
+                <div class="h-16 w-full rounded-lg skeleton"></div>
+            `;
 
             try {
-                const res = await fetch(`${API_URL}/admin/reset-views`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: authToken })
-                });
-                const data = await res.json();
-                if(data.success) {
-                    alert("Success! Views have been cleared.");
-                    fetchStats();
-                } else {
-                    alert("Error: " + data.message);
+                const res = await fetch(`${API_URL}/apps`);
+                const apps = await res.json();
+                appCache = apps; // Cache for editing
+                
+                if(countLabel) countLabel.innerText = apps.length;
+                container.innerHTML = '';
+
+                if(apps.length === 0) {
+                    container.innerHTML = '<div class="text-center py-12 text-gray-500">Library is empty</div>';
+                    return;
                 }
-            } catch(e) { alert("Server Error"); }
+
+                apps.reverse().forEach(app => {
+                    container.innerHTML += `
+                        <div class="group grid grid-cols-12 gap-4 px-4 py-3 rounded-xl hover:bg-white/5 transition items-center border border-transparent hover:border-white/5">
+                            
+                            <!-- Col 1: Details -->
+                            <div class="col-span-6 md:col-span-5 flex items-center gap-3 overflow-hidden">
+                                <div class="w-10 h-10 rounded-lg bg-base border border-stroke overflow-hidden flex-shrink-0">
+                                    <img src="${app.img}" class="w-full h-full object-cover">
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="font-medium text-sm text-gray-200 truncate">${app.title}</h4>
+                                    <p class="text-xs text-gray-500 truncate font-mono">${app.desc || 'No key required'}</p>
+                                </div>
+                            </div>
+
+                            <!-- Col 2: Category -->
+                            <div class="col-span-3 hidden md:flex items-center">
+                                <span class="px-2 py-1 rounded text-[10px] font-medium uppercase tracking-wide bg-white/5 text-gray-400 border border-white/5">
+                                    ${app.category}
+                                </span>
+                            </div>
+
+                            <!-- Col 3: Status -->
+                            <div class="col-span-3 hidden md:flex items-center">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-current ${app.color || 'text-emerald-400'}"></div>
+                                    <span class="text-xs text-gray-400">${app.status || 'Active'}</span>
+                                </div>
+                            </div>
+
+                            <!-- Col 4: Actions (View, Edit, Delete) -->
+                            <div class="col-span-6 md:col-span-1 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition">
+                                <!-- VIEW -->
+                                <a href="${app.link}" target="_blank" title="View Link" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                </a>
+                                <!-- EDIT -->
+                                <button onclick="openEditModal('${app._id}')" title="Edit" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-gray-400 hover:text-accent transition">
+                                    <i class="fa-solid fa-pencil text-xs"></i>
+                                </button>
+                                <!-- DELETE -->
+                                <button onclick="deleteApp('${app._id}')" title="Delete" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-500 transition">
+                                    <i class="fa-solid fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch(e) { container.innerHTML = "Error loading data."; }
         }
 
-        function logout() {
-            localStorage.removeItem('nhoy_admin_pass');
-            location.reload();
+        async function deleteApp(id) {
+            if(!confirm("Are you sure you want to remove this item permanently?")) return;
+            try {
+                await fetch(`${API_URL}/admin/delete-app`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: authToken, id: id })
+                });
+                showToast('Item deleted');
+                fetchAdminApps();
+            } catch(e) { showToast('Delete failed', 'error'); }
+        }
+
+        // --- TOAST NOTIFICATIONS ---
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const color = type === 'success' ? 'border-emerald-500' : 'border-red-500';
+            const icon = type === 'success' ? 'fa-check-circle text-emerald-500' : 'fa-exclamation-circle text-red-500';
+            
+            toast.className = `glass px-4 py-3 rounded-lg border-l-4 ${color} flex items-center gap-3 shadow-xl transform translate-y-10 opacity-0 transition-all duration-300 min-w-[250px]`;
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span class="text-sm font-medium">${msg}</span>`;
+            
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.remove('translate-y-10', 'opacity-0'));
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
     </script>
 </body>

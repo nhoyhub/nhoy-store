@@ -71,7 +71,8 @@
     <!-- NAVIGATION -->
     <nav class="fixed top-4 left-4 right-4 max-w-6xl mx-auto z-50">
         <div class="glass-nav rounded-2xl h-16 flex items-center justify-between px-4 relative z-50">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="resetView()">
+            <!-- LOGO -->
+            <div class="flex items-center gap-3 cursor-pointer select-none" onclick="resetView()">
                 <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-primary to-accent p-[2px]">
                     <img src="https://i.pinimg.com/1200x/14/a1/71/14a171de882e567cc020668c691eba2d.jpg" class="w-full h-full rounded-full object-cover border border-black/50">
                 </div>
@@ -87,9 +88,15 @@
                 <button onclick="selectCategory('ksign', this)" class="nav-btn-d px-5 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-all">Ksign</button>
                 <button onclick="selectCategory('roblox', this)" class="nav-btn-d px-5 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-all">Roblox</button>
                 <button onclick="selectCategory('troll', this)" class="nav-btn-d px-5 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-all">TrollStore</button>
+                
+                <!-- NEW ADMIN LOGIN BUTTON -->
+                <div class="w-[1px] h-5 bg-white/10 mx-1"></div>
+                <a href="admin.html" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-primary hover:bg-white/10 transition-all flex items-center justify-center">
+                    <i class="fa-solid fa-lock"></i>
+                </a>
             </div>
 
-            <!-- Hamburger -->
+            <!-- Hamburger (Mobile) -->
             <button onclick="toggleMenu()" class="md:hidden w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-white active:scale-95 transition-all">
                 <i id="menu-icon" class="fa-solid fa-bars-staggered text-lg"></i>
             </button>
@@ -117,10 +124,16 @@
                 <div><h3 class="font-bold text-white text-sm group-hover:text-green-400 transition-colors">TrollStore</h3><p class="text-[11px] text-gray-400">Permanent Signing</p></div>
                 <i class="fa-solid fa-chevron-right ml-auto text-xs text-gray-600"></i>
             </button>
+            
             <div class="mt-2 pt-3 border-t border-white/5 flex gap-2">
                 <a href="https://t.me/nhoy200" target="_blank" class="flex-1 py-2.5 rounded-xl bg-[#229ED9]/10 text-[#229ED9] text-xs font-bold flex items-center justify-center gap-2 hover:bg-[#229ED9] hover:text-white transition-colors"><i class="fa-brands fa-telegram text-base"></i> Telegram</a>
                 <a href="https://www.youtube.com/@xai-qq" target="_blank" class="flex-1 py-2.5 rounded-xl bg-red-500/10 text-red-500 text-xs font-bold flex items-center justify-center gap-2 hover:bg-red-500 hover:text-white transition-colors"><i class="fa-brands fa-youtube text-base"></i> Youtube</a>
             </div>
+            
+            <!-- Mobile Admin Link -->
+             <a href="admin.html" class="mt-2 w-full py-2.5 rounded-xl bg-white/5 text-gray-400 text-xs font-bold flex items-center justify-center gap-2 hover:bg-white/10 hover:text-white transition-colors">
+                <i class="fa-solid fa-lock"></i> Admin Login
+            </a>
         </div>
     </nav>
 
@@ -204,7 +217,6 @@
                     <h3 class="text-white font-bold mb-5 relative inline-block after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-8 after:h-0.5 after:bg-primary rounded-full">Language</h3>
                     <div class="flex flex-col gap-3">
                         <button class="flex items-center justify-between w-full px-4 py-3 rounded-xl bg-white/5 border border-primary/50 text-white text-sm font-medium"><span>English</span><i class="fa-solid fa-check text-primary"></i></button>
-                        <button class="flex items-center justify-between w-full px-4 py-3 rounded-xl bg-transparent border border-white/10 text-gray-400 text-sm font-medium"><span>ខ្មែរ</span></button>
                     </div>
                 </div>
             </div>
@@ -236,12 +248,14 @@
         </div>
     </div>
 
-    <script>
-        // --- ADDED: API URL CONSTANT ---
-        const API_URL = "https://nhoy-store.onrender.com/api";
-
-        // --- DATA ---
-        const Esign = {
+<script>
+        // --- API CONFIGURATION ---
+        // Ensure this matches where your app.py is running
+        const API_URL = "https://nhoy-store.onrender.com/api"; 
+        
+        // --- 1. OLD DATA (Hardcoded) ---
+        // This ensures your original apps are always there
+        const HardcodedData = {
             esign: [
                 { title: "Esign Pro", version: "v5.0", status: "Signed", color: "text-green-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "No Revoke • 1 Year", link: "https://api.khoindvn.eu.org/k1Ycos" },
                 { title: "Esign Plus", version: "v4.8", status: "Signed", color: "text-green-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "Stable Certificate", link: "https://api.khoindvn.io.vn/jA06Dp" },
@@ -255,10 +269,7 @@
                 { title: "Esign Plus", version: "v4.8", status: "Signed", color: "text-green-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "Stable Certificate", link: "https://api.khoindvn.io.vn/rR9jps" },
                 { title: "Esign Pro", version: "v5.0", status: "Signed", color: "text-green-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "No Revoke • 1 Year", link: "https://api.khoindvn.io.vn/DoD29p" },
                 { title: "Esign Plus", version: "v4.8", status: "Signed", color: "text-green-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "Stable Certificate", link: "https://api.khoindvn.io.vn/OuUeFv" }, 
-            ]
-        };
-
-        const ksign = {
+            ],
             ksign: [
                 { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/WAF9IA" },
                 { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/5PwyVy" },
@@ -276,17 +287,11 @@
                 { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/5PdaWQ" },
                 { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/QC273L" },
                 { title: "Ksign VIP", version: "Max", status: "Work", color: "text-yellow-400", img: "https://khoindvn.io.vn/img/pf/favicon.ico", desc: "Premium Cert", link: "https://api.khoindvn.io.vn/QC273L" },
-            ]
-        };
-
-        const roblox = {
+            ],
             roblox: [
                 { title: "Delta Executor", version: "v2.645", status: "Updated", color: "text-purple-400", img: "https://deltaios-executor.com/Icon.jpg", desc: "Keyless • No Crash", link: "itms-services://?action=download-manifest&url=https%3A%2F%2Fdeltaios-executor.com%2FInstall21.plist" },
                 { title: "Krnl Executor", version: "v2.645", status: "Updated", color: "text-purple-400", img: "https://krnl-ios.com/unnamed.png", desc: "Keyless • No Crash", link: "itms-services://?action=download-manifest&url=https://krnl-ios.com/Install2.plist" }
-            ]
-        };
-
-        const trollstore = {
+            ],
             troll: [
                 { title: "TrollStore ", version: "Perm", status: "System", color: "text-blue-400", img: "https://i.pinimg.com/474x/1c/d7/04/1cd7044b82d9ef32d1830008a262e747.jpg", desc: "iOS 15 - 17.0", link: "https://github.com/JJTech0130/TrollRestore/releases/download/1.0/TrollRestore.exe" },
                 { title: "Certificate-Khoindvn ", version: "Perm", status: "System", color: "text-blue-400", img: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", desc: "Spp all Phone", link: "https://github.com/esigncert/khoindvn/raw/refs/heads/main/document/DNS/Certs-Khoindvn.zip" },
@@ -294,50 +299,65 @@
             ]
         };
 
-        const DB = { ...Esign, ...ksign, ...roblox, ...trollstore };
-
-        // --- LOGIC ---
+        // --- GLOBAL VARIABLES ---
+        let DB = JSON.parse(JSON.stringify(HardcodedData)); // Initialize with hardcoded data
         let currentCategory = 'esign';
         let isMenuOpen = false;
         const menu = document.getElementById('mobile-menu');
         const menuIcon = document.getElementById('menu-icon');
 
+        // --- STARTUP ---
         window.onload = () => {
-            renderCards('esign');
+            renderCards('esign'); // Show hardcoded data immediately
+            fetchAdminApps();     // Then fetch Admin data and update
             incrementViews();
         };
 
-        // --- UPDATED: Use API_URL constant ---
+        // --- FETCH & MERGE DATA ---
+        async function fetchAdminApps() {
+            try {
+                // 1. Fetch from Admin Database
+                const response = await fetch(`${API_URL}/apps`);
+                const adminApps = await response.json();
+                
+                // 2. Add Admin Apps to our DB List
+                adminApps.forEach(app => {
+                    if(DB[app.category]) {
+                        // Add new app to the BEGINNING of the list (so it shows first)
+                        DB[app.category].unshift(app);
+                    }
+                });
+
+                // 3. Refresh the display to show the merged data
+                renderCards(currentCategory);
+
+            } catch (error) {
+                console.log("Could not load Admin apps (Backend might be offline), showing only hardcoded apps.");
+            }
+        }
+
+        // --- VIEW COUNTER ---
         function incrementViews() {
             const counterElement = document.getElementById('view-counter');
-            
-            // Call the Python Backend at http://127.0.0.1:5000/api/visit
-            fetch(`${API_URL}/visit`, {
-                method: 'POST'
-            })
+            fetch(`${API_URL}/visit`, { method: 'POST' })
             .then(response => response.json())
             .then(data => {
-                if(counterElement && data.count) {
-                    counterElement.innerText = data.count.toLocaleString();
-                } else {
-                     counterElement.innerText = "Error";
-                }
+                if(counterElement && data.count) counterElement.innerText = data.count.toLocaleString();
+                else counterElement.innerText = "Error";
             })
             .catch(error => {
-                console.error('Error fetching views:', error);
                 counterElement.innerText = "Offline";
             });
         }
 
+        // --- UI FUNCTIONS ---
         function toggleMenu() {
             isMenuOpen = !isMenuOpen;
             if(isMenuOpen) { 
-                menu.classList.remove('menu-hidden'); 
-                menu.classList.add('menu-visible'); 
+                menu.classList.remove('menu-hidden'); menu.classList.add('menu-visible'); 
                 menuIcon.classList.replace('fa-bars-staggered', 'fa-xmark'); 
             } else { 
-                menu.classList.remove('menu-visible'); 
-                menu.classList.add('menu-hidden'); 
+                menu.classList.remove('menu-visible'); menu.classList.add('menu-hidden'); 
                 menuIcon.classList.replace('fa-xmark', 'fa-bars-staggered'); 
             }
         }
@@ -368,11 +388,16 @@
             const container = document.getElementById('grid-container');
             const items = DB[cat] || [];
             container.innerHTML = '';
-            if(items.length === 0) { container.innerHTML = `<div class="col-span-full text-center py-20 text-gray-500">No items available.</div>`; return; }
+            
+            if(items.length === 0) { 
+                container.innerHTML = `<div class="col-span-full text-center py-20 text-gray-500">No items available.</div>`; 
+                return; 
+            }
+
             items.forEach((item, index) => {
                 const card = document.createElement('div');
                 card.className = `glass-card rounded-2xl p-3 flex items-center gap-4 relative group overflow-hidden fade-in-up hover:border-primary/50 transition duration-300`;
-                card.style.animationDelay = `${index * 100}ms`;
+                card.style.animationDelay = `${index * 50}ms`;
                 
                 card.innerHTML = `
                     <div class="relative w-14 h-14 shrink-0 rounded-xl overflow-hidden shadow-lg border border-white/10">
@@ -394,12 +419,12 @@
             });
         }
 
+        // --- LOCKER & DOWNLOAD LOGIC ---
         let currentLink = ''; let currentAppImg = ''; 
         const modal = document.getElementById('locker-modal'); const backdrop = document.getElementById('locker-backdrop'); const content = document.getElementById('locker-content'); const actionArea = document.getElementById('action-area'); const lockerIcon = document.getElementById('locker-icon');
         
         function openLocker(link, title, img) { 
-            currentLink = link; 
-            currentAppImg = img; 
+            currentLink = link; currentAppImg = img; 
             document.getElementById('locker-app-name').innerText = title; 
             modal.classList.remove('hidden'); 
             setTimeout(() => { backdrop.classList.remove('opacity-0'); content.classList.remove('opacity-0', 'scale-95'); content.classList.add('scale-100'); }, 10); 
@@ -407,9 +432,7 @@
         }
         
         function closeLocker() { 
-            backdrop.classList.add('opacity-0'); 
-            content.classList.remove('scale-100'); 
-            content.classList.add('opacity-0', 'scale-95'); 
+            backdrop.classList.add('opacity-0'); content.classList.remove('scale-100'); content.classList.add('opacity-0', 'scale-95'); 
             setTimeout(() => modal.classList.add('hidden'), 300); 
         }
         
@@ -419,8 +442,7 @@
             
             if(step === 1) { 
                 lockerIcon.src = "https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg"; 
-                d1.className = "w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold ring-4 ring-primary/20 transition-all shadow-[0_0_15px_rgba(99,102,241,0.5)]"; 
-                d1.innerHTML = "1"; 
+                d1.className = "w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold ring-4 ring-primary/20 transition-all shadow-[0_0_15px_rgba(99,102,241,0.5)]"; d1.innerHTML = "1"; 
                 actionArea.innerHTML = `<button onclick="processStep(1)" class="w-full py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-500 text-white font-bold hover:shadow-lg hover:shadow-red-500/30 transition flex items-center justify-center gap-2 group"><i class="fa-brands fa-youtube group-hover:scale-110 transition"></i> Subscribe Channel</button>`; 
             }
             else if (step === 2) { 
@@ -439,17 +461,34 @@
         }
         
         function processStep(step) { 
-            const btn = actionArea.querySelector('button'); 
-            btn.disabled = true; 
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Checking...'; 
-            
+            const btn = actionArea.querySelector('button'); btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Checking...'; 
             if(step === 1) window.open('https://www.youtube.com/@xai-qq?si=uPsNoogH7OaNU__O', '_blank'); 
             if(step === 2) window.open('https://t.me/nhoy200', '_blank'); 
-            
             setTimeout(() => showStep(step + 1), 3000); 
         }
         
         function resetView() { window.scrollTo({top: 0, behavior: 'smooth'}); selectCategory('esign'); }
+
+        // --- SECRET ADMIN LOGIN ---
+        let logoClickCount = 0;
+        let logoClickTimer;
+
+        function handleLogoClick() {
+            clearTimeout(logoClickTimer);
+            logoClickCount++;
+            
+            if (logoClickCount === 5) {
+                const logo = document.querySelector('.glass-nav img');
+                logo.style.filter = "hue-rotate(90deg)";
+                setTimeout(() => window.location.href = 'admin.html', 300);
+                logoClickCount = 0;
+            } else {
+                logoClickTimer = setTimeout(() => {
+                    if(logoClickCount === 1) resetView();
+                    logoClickCount = 0;
+                }, 400);
+            }
+        }
     </script>
 </body>
 </html>
