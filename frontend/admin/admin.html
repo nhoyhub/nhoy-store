@@ -1,302 +1,605 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NhoyHub Admin Panel</title>
-    <!-- Tailwind CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NhoyHub | Nova Horizon</title>
+    
+    <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Noto+Serif+Khmer:wght@400;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
-                    colors: { bg: '#050510', glass: 'rgba(255, 255, 255, 0.05)', primary: '#6366f1', danger: '#ef4444' }
+                    fontFamily: { 
+                        sans: ['"Outfit"', 'sans-serif'],
+                        khmer: ['"Noto Serif Khmer"', 'serif']
+                    },
+                    colors: { 
+                        void: '#050505',
+                        panel: '#0a0a0c',
+                        starlight: '#e2e8f0',
+                        accent: '#8b5cf6', 
+                        accent_hover: '#7c3aed',
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite'
+                    }
                 }
             }
         }
     </script>
     <style>
-        body { background-color: #050510; color: white; }
-        .glass-panel {
-            background: rgba(15, 20, 35, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        /* --- CORE UNIVERSE SETTINGS --- */
+        body { 
+            background-color: #020205; /* Deep Void */
+            color: #e2e8f0; 
+            margin: 0;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            perspective: 1200px; /* Essential for 3D */
+        }
+
+        /* --- NOVA BACKGROUND ENGINE --- */
+        #nova-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; pointer-events: none;
+        }
+        .nova-nebula {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -2; overflow: hidden; background: #020205;
+        }
+        .nebula-cloud {
+            position: absolute; border-radius: 50%; filter: blur(80px);
+            opacity: 0.4; animation: nebula-float 20s infinite alternate;
+        }
+        .cloud-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, #4c1d95 0%, transparent 70%); animation-duration: 25s; }
+        .cloud-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: radial-gradient(circle, #3b0764 0%, transparent 70%); animation-duration: 30s; }
+        .cloud-3 { top: 40%; left: 40%; width: 40vw; height: 40vw; background: radial-gradient(circle, #1e1b4b 0%, transparent 70%); animation-duration: 40s; mix-blend-mode: screen; }
+        @keyframes nebula-float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(20px, -20px) scale(1.1); } }
+
+        /* --- 1. LOGIN CARD (THE CERT VAULT DESIGN) --- */
+        .tilt-card {
+            background: rgba(10, 10, 12, 0.7);
             backdrop-filter: blur(20px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 100px rgba(139, 92, 246, 0.1);
+            transform-style: preserve-3d;
+            will-change: transform;
+            transition: transform 0.1s ease-out;
         }
-        .input-glass {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
+        .void-panel {
+            background: black;
+            overflow: hidden;
+            border-right: 1px solid rgba(255,255,255,0.05);
+            transform-style: preserve-3d; 
         }
-        .input-glass:focus {
-            border-color: #6366f1;
-            outline: none;
+        /* Black Hole Physics */
+        .accretion-disk {
+            position: absolute; width: 300px; height: 300px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, transparent 0%, #4c1d95 35%, #8b5cf6 50%, #fff 55%, #8b5cf6 60%, #4c1d95 75%, transparent 100%);
+            transform: rotateX(75deg) scale(1.4); 
+            filter: blur(8px); opacity: 0.9;
+            box-shadow: 0 0 60px rgba(139, 92, 246, 0.4);
+            animation: spin-hole 8s linear infinite;
         }
-        .fade-in { animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .event-horizon {
+            position: absolute; width: 90px; height: 90px;
+            background: #000; border-radius: 50%;
+            box-shadow: inset 0 0 20px #000, 0 0 25px rgba(139, 92, 246, 0.8);
+            z-index: 10; transform: translateZ(30px);
+        }
+        .photon-ring {
+            position: absolute; width: 100px; height: 100px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-top: 2px solid #fff; border-bottom: 2px solid #fff;
+            transform: translateZ(32px) rotate(-45deg);
+            filter: blur(1px); opacity: 0.5; box-shadow: 0 0 15px white;
+        }
+        @keyframes spin-hole { 0% { transform: rotateX(75deg) rotateZ(0deg) scale(1.4); } 100% { transform: rotateX(75deg) rotateZ(360deg) scale(1.4); } }
+        
+        /* Login Inputs */
+        .input-void {
+            width: 100%; background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1); color: white;
+            padding: 14px 20px 14px 44px; border-radius: 12px; outline: none; transition: all 0.3s;
+        }
+        .input-void:focus { background: rgba(139, 92, 246, 0.08); border-color: #8b5cf6; box-shadow: 0 0 20px rgba(139, 92, 246, 0.1); }
+        .btn-nova {
+            width: 100%; padding: 14px; border-radius: 12px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+            color: white; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3); border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-nova:hover { transform: scale(1.02); box-shadow: 0 0 30px rgba(139, 92, 246, 0.5); }
+        .btn-nova:active { transform: scale(0.98); }
+
+        /* --- 2. DASHBOARD COMPONENTS --- */
+        .tilt-3d { transform-style: preserve-3d; transition: transform 0.1s ease-out; will-change: transform; }
+        .tilt-glare {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1), transparent 60%);
+            opacity: 0; pointer-events: none; z-index: 50;
+            mix-blend-mode: overlay; transition: opacity 0.3s ease; border-radius: inherit;
+        }
+        .hud-card {
+            background: rgba(10, 10, 12, 0.6); backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08); transform-style: preserve-3d;
+        }
+        .input-modern {
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255,255,255,0.15);
+            color: white; transition: all 0.3s ease;
+        }
+        .input-modern:focus { border-color: #8b5cf6; background: rgba(139, 92, 246, 0.05); }
+        select option { background-color: #1a1a1a; color: white; padding: 10px; }
+        
+        .glass-card-preview {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.03) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; transform-style: preserve-3d;
+        }
+        .chart-bar { height: 0%; transition: height 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); border-radius: 6px 6px 0 0; }
+        .bar-active { background: linear-gradient(to bottom, #9ca3af, #4b5563); box-shadow: 0 0 15px rgba(255,255,255,0.1); }
+        .bar-inactive { background-color: #333333; }
+        .day-card.active { background: linear-gradient(180deg, #4b5563 0%, #374151 100%); border: 1px solid rgba(255,255,255,0.1); transform: scale(1.05); }
+
+        /* Floating Utilities */
+        .float-z-10 { transform: translateZ(10px); }
+        .float-z-20 { transform: translateZ(20px); }
+        .float-z-30 { transform: translateZ(30px); }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+<body class="h-screen w-full flex flex-col text-sm md:text-base font-sans overflow-hidden">
 
-    <!-- Background Effects -->
-    <div class="fixed inset-0 -z-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-    <div class="fixed top-[-10%] right-[-10%] w-96 h-96 bg-primary/20 rounded-full blur-[120px] -z-10"></div>
-    <div class="fixed bottom-[-10%] left-[-10%] w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] -z-10"></div>
+    <!-- BACKGROUND STARS -->
+    <div class="nova-nebula"><div class="nebula-cloud cloud-1"></div><div class="nebula-cloud cloud-2"></div><div class="nebula-cloud cloud-3"></div></div>
+    <canvas id="nova-canvas"></canvas>
 
-    <!-- LOGIN SECTION -->
-    <div id="login-section" class="w-full max-w-sm glass-panel rounded-2xl p-8 shadow-2xl transition-all duration-500">
-        <div class="text-center mb-8">
-            <div class="w-16 h-16 bg-gradient-to-tr from-primary to-purple-500 rounded-full mx-auto mb-4 p-[2px]">
-                <img src="https://i.pinimg.com/1200x/14/a1/71/14a171de882e567cc020668c691eba2d.jpg" class="w-full h-full rounded-full object-cover border border-black">
+    <!-- 1. LOGIN SCREEN (3D BLACK HOLE) -->
+    <div id="login-view" class="fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-700 bg-black/60 backdrop-blur-sm">
+        <div class="tilt-card w-full max-w-4xl h-[550px] rounded-3xl flex flex-col md:flex-row overflow-hidden relative" id="login-card-inner" data-tilt-strength="20">
+            <div class="tilt-glare"></div>
+
+            <!-- Left: The Black Hole -->
+            <div class="void-panel relative w-full md:w-5/12 h-48 md:h-full flex items-center justify-center bg-black">
+                <div class="accretion-disk"></div>
+                <div class="event-horizon"></div>
+                <div class="photon-ring"></div>
+                <div class="absolute bottom-6 left-6 float-z-30 hidden md:block">
+                    <div class="flex items-center gap-3">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_#10b981]"></div>
+                        <span class="text-[10px] font-mono text-gray-400 tracking-widest uppercase">System Operational</span>
+                    </div>
+                </div>
             </div>
-            <h1 class="text-2xl font-bold tracking-tight">Admin Access</h1>
-            <p class="text-gray-400 text-xs mt-1">Authenticate to manage NhoyHub</p>
+
+            <!-- Right: The Form -->
+            <div class="relative w-full md:w-7/12 h-full bg-[#0E0E10] flex flex-col justify-center p-8 md:p-14" style="transform:translateZ(10px)">
+                <div class="float-z-30 mb-8">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fa-solid fa-shield-halved text-accent"></i>
+                        <span class="text-[10px] font-bold text-accent tracking-[0.3em] uppercase">Secure Gateway</span>
+                    </div>
+                    <h1 class="text-3xl text-white font-light tracking-wide">NhoyHub <span class="font-bold">Login</span></h1>
+                    <p class="text-gray-500 text-xs mt-2">Enter credentials to access the ecosystem.</p>
+                </div>
+
+                <div class="space-y-5 float-z-20 max-w-sm">
+                    <div class="relative group">
+                        <i class="fa-solid fa-fingerprint absolute left-4 top-4 text-gray-500 group-hover:text-white transition"></i>
+                        <input type="text" placeholder="Identity (Admin)" class="input-void text-sm" value="Administrator" readonly>
+                    </div>
+                    <div class="relative group">
+                        <i class="fa-solid fa-key absolute left-4 top-4 text-gray-500 group-hover:text-white transition"></i>
+                        <input type="password" id="admin-pass" placeholder="Access Key" onkeyup="if(event.key === 'Enter') doLogin()" class="input-void text-sm">
+                    </div>
+                    <button onclick="doLogin()" class="btn-nova text-xs mt-4 shadow-lg hover:shadow-accent/40">Authenticate</button>
+                    
+                    <div class="flex justify-center gap-6 text-gray-500 mt-6 text-lg">
+                        <i class="fa-brands fa-github hover:text-white transition cursor-pointer"></i>
+                        <i class="fa-brands fa-telegram hover:text-blue-400 transition cursor-pointer"></i>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
+
+    <!-- 2. DASHBOARD VIEW -->
+    <div id="dashboard-view" class="hidden flex w-full h-full relative z-10 opacity-0 transition-opacity duration-1000">
         
-        <div class="space-y-4">
-            <div>
-                <label class="text-xs text-gray-500 font-bold ml-1 uppercase">Password</label>
-                <input type="password" id="admin-pass" placeholder="••••••••" class="input-glass w-full rounded-xl px-4 py-3 mt-1 transition-all">
+        <!-- Sidebar -->
+        <aside class="hidden md:flex w-72 flex-col border-r border-white/5 bg-black/40 backdrop-blur-xl">
+            <div class="h-20 flex items-center gap-4 px-8 border-b border-white/5">
+                <div class="w-8 h-8 rounded bg-gradient-to-br from-accent to-white flex items-center justify-center shadow-[0_0_15px_#8b5cf6]"><i class="fa-solid fa-black-hole text-black text-xs"></i></div>
+                <div><h2 class="font-bold text-lg tracking-wide text-white">NhoyHub</h2><span class="text-[10px] text-accent uppercase tracking-widest">Command Center</span></div>
             </div>
-            <button onclick="doLogin()" class="w-full bg-primary hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-primary/20 active:scale-95">
-                <i class="fa-solid fa-lock-open mr-2"></i> Login
-            </button>
-            <p id="login-msg" class="text-center text-red-500 text-xs font-bold h-4 mt-2"></p>
-        </div>
+            <nav class="p-6 space-y-2 flex-1">
+                <button onclick="switchTab('overview')" id="desk-nav-overview" class="w-full flex items-center gap-4 px-5 py-4 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition group nav-item active"><i class="fa-solid fa-globe"></i><span class="font-medium tracking-wide">Overview</span></button>
+                <button onclick="switchTab('apps')" id="desk-nav-apps" class="w-full flex items-center gap-4 px-5 py-4 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition group nav-item"><i class="fa-solid fa-meteor"></i><span class="font-medium tracking-wide">Artifacts</span></button>
+            </nav>
+            <div class="p-6 border-t border-white/5"><button onclick="logout()" class="flex items-center gap-3 w-full px-5 py-3 rounded-xl border border-white/5 hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-400 text-gray-500 transition"><i class="fa-solid fa-power-off"></i><span class="text-xs font-bold uppercase">Terminate</span></button></div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col relative h-full">
+            <header class="h-16 md:h-20 border-b border-white/5 bg-black/20 backdrop-blur-md px-6 flex items-center justify-between">
+                <div class="flex items-center gap-3 md:hidden"><i class="fa-solid fa-infinity text-accent"></i><span class="font-bold tracking-widest text-white">NHOY</span></div>
+                <h2 id="page-title" class="hidden md:block text-sm font-light tracking-[0.2em] text-gray-400 uppercase">System Overview</h2>
+                <div class="flex items-center gap-4"><div class="px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div><span class="text-[10px] font-bold text-emerald-400 tracking-wider">ONLINE</span></div></div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-4 md:p-10 pb-28 md:pb-10">
+                <!-- OVERVIEW TAB -->
+                <div id="tab-overview" class="max-w-7xl mx-auto space-y-6 animate-[fadeIn_0.5s_ease-out]">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="hud-card tilt-3d p-6 rounded-2xl relative overflow-hidden group" data-tilt-strength="20">
+                            <div class="tilt-glare"></div>
+                            <div class="absolute -right-6 -top-6 w-24 h-24 bg-accent/20 rounded-full blur-2xl group-hover:bg-accent/30 transition"></div>
+                            <h3 class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2" style="transform:translateZ(10px)">Active Entities</h3>
+                            <div class="flex items-end gap-2" style="transform:translateZ(20px)"><span class="text-4xl font-light text-white" id="total-apps-count">0</span><span class="text-xs text-accent mb-1.5">Scripts</span></div>
+                        </div>
+                        <div class="hud-card tilt-3d p-6 rounded-2xl relative overflow-hidden group" data-tilt-strength="20">
+                            <div class="tilt-glare"></div>
+                            <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl group-hover:bg-blue-500/30 transition"></div>
+                            <h3 class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2" style="transform:translateZ(10px)">Global Impressions</h3>
+                            <div class="flex items-end gap-2" style="transform:translateZ(20px)"><span class="text-4xl font-light text-white" id="live-views">0</span><span class="text-xs text-blue-400 mb-1.5">Views</span></div>
+                        </div>
+                        <!-- MODIFIED SYSTEM CONTROL CARD -->
+                        <div class="hud-card tilt-3d p-5 rounded-2xl flex flex-col justify-between" data-tilt-strength="10">
+                            <div class="tilt-glare"></div>
+                            <!-- View Counter Control -->
+                            <div class="mb-3 border-b border-white/5 pb-3">
+                                <label class="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-2 block">Set Views</label>
+                                <div class="flex gap-2" style="transform:translateZ(10px)">
+                                    <input type="number" id="manual-view-input" class="w-full h-8 rounded-lg px-3 bg-black/40 border border-white/10 text-white text-xs outline-none focus:border-accent" placeholder="1200">
+                                    <button onclick="updateCustomViews()" class="bg-white/10 hover:bg-white text-white hover:text-black px-3 rounded-lg transition border border-white/10"><i class="fa-solid fa-check text-xs"></i></button>
+                                </div>
+                            </div>
+                            <!-- LOCKER TOGGLE SWITCH -->
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <label class="text-[9px] text-gray-500 font-bold uppercase tracking-widest block">Locker System</label>
+                                    <span id="locker-text" class="text-xs font-bold text-emerald-400">ACTIVE</span>
+                                </div>
+                                <button onclick="toggleGlobalLocker()" id="locker-btn" class="w-12 h-6 rounded-full bg-emerald-500 relative transition-all shadow-lg" style="transform:translateZ(15px)">
+                                    <div id="locker-knob" class="w-4 h-4 bg-white rounded-full absolute top-1 right-1 shadow-md transition-all"></div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- CHARTS ROW -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 hud-card p-6 rounded-2xl flex flex-col">
+                            <div class="flex justify-between items-start mb-8">
+                                <div><h3 class="text-lg text-white font-medium">Activity Log</h3><p class="text-xs text-gray-500 mt-1">Ecosystem interactions over time</p></div>
+                                <div class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transform -rotate-45"><i class="fa-solid fa-arrow-right text-gray-400"></i></div>
+                            </div>
+                            <div class="flex-1 flex items-end justify-between gap-2 md:gap-6 px-2 h-48 md:h-64" id="bar-chart-container">
+                                <div class="flex flex-col items-center gap-3 w-full group cursor-pointer"><div class="w-full max-w-[40px] bar-inactive rounded-t-lg relative chart-bar" data-height="60%"></div><span class="text-xs text-gray-500 font-medium">Jan</span></div>
+                                <div class="flex flex-col items-center gap-3 w-full group cursor-pointer"><div class="w-full max-w-[40px] bar-inactive rounded-t-lg relative chart-bar" data-height="45%"></div><span class="text-xs text-gray-500 font-medium">Feb</span></div>
+                                <div class="flex flex-col items-center gap-3 w-full group cursor-pointer"><div class="w-full max-w-[40px] bar-active rounded-t-lg relative chart-bar" data-height="80%"></div><span class="text-xs text-white font-bold">Mar</span></div>
+                                <div class="flex flex-col items-center gap-3 w-full group cursor-pointer"><div class="w-full max-w-[40px] bar-inactive rounded-t-lg relative chart-bar" data-height="40%"></div><span class="text-xs text-gray-500 font-medium">Apr</span></div>
+                                <div class="flex flex-col items-center gap-3 w-full group cursor-pointer"><div class="w-full max-w-[40px] bar-inactive rounded-t-lg relative chart-bar" data-height="75%"></div><span class="text-xs text-gray-500 font-medium">May</span></div>
+                                <div class="flex flex-col items-center gap-3 w-full group cursor-pointer"><div class="w-full max-w-[40px] bar-inactive rounded-t-lg relative chart-bar" data-height="25%"></div><span class="text-xs text-gray-500 font-medium">Jun</span></div>
+                            </div>
+                        </div>
+                        <div class="hud-card p-6 rounded-2xl flex flex-col">
+                            <div class="flex justify-between items-center mb-8"><button class="text-gray-600 hover:text-white transition"><i class="fa-solid fa-chevron-left text-xs"></i></button><span class="text-white font-medium tracking-wide">September 2024</span><button class="text-gray-600 hover:text-white transition"><i class="fa-solid fa-chevron-right text-xs"></i></button></div>
+                            <div class="flex justify-between items-center mb-8" id="calendar-days">
+                                <div class="flex flex-col items-center gap-3 day-card p-3" onclick="selectDay(this)"><span class="text-[10px] uppercase text-gray-500 font-bold day-name">Tue</span><span class="text-sm font-medium text-gray-400 day-num">17</span></div>
+                                <div class="flex flex-col items-center gap-3 day-card p-3" onclick="selectDay(this)"><span class="text-[10px] uppercase text-gray-500 font-bold day-name">Wed</span><span class="text-sm font-medium text-gray-400 day-num">18</span></div>
+                                <div class="flex flex-col items-center gap-3 day-card p-3 active" onclick="selectDay(this)"><span class="text-[10px] uppercase font-bold day-name">Thu</span><span class="text-sm font-medium day-num">19</span></div>
+                                <div class="flex flex-col items-center gap-3 day-card p-3" onclick="selectDay(this)"><span class="text-[10px] uppercase text-gray-500 font-bold day-name">Fri</span><span class="text-sm font-medium text-gray-400 day-num">20</span></div>
+                                <div class="flex flex-col items-center gap-3 day-card p-3" onclick="selectDay(this)"><span class="text-[10px] uppercase text-gray-500 font-bold day-name">Sat</span><span class="text-sm font-medium text-gray-400 day-num">21</span></div>
+                            </div>
+                            <div class="mt-auto pt-6 border-t border-white/5">
+                                <div class="flex items-center justify-between">
+                                    <div><h4 class="text-sm text-white font-bold">Community growth</h4><div class="flex items-center gap-2 mt-1"><i class="fa-solid fa-arrow-trend-up text-emerald-400 text-xs"></i><span class="text-xs text-emerald-400">0.9%</span></div></div>
+                                    <div class="w-12 h-12 rounded-full relative flex items-center justify-center transition-all duration-1000" id="growth-circle" style="background: conic-gradient(#ffffff 0%, rgba(255,255,255,0.1) 0);"><div class="w-9 h-9 bg-[#121215] rounded-full flex items-center justify-center"><span class="text-[10px] font-bold text-white" id="growth-text">0%</span></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- APPS TAB -->
+                <div id="tab-apps" class="hidden max-w-7xl mx-auto animate-[fadeIn_0.5s_ease-out]">
+                    <div class="flex justify-between items-end mb-8">
+                        <div><h1 class="text-2xl md:text-3xl font-light text-white tracking-tight">Artifact Library</h1><p class="text-gray-500 text-sm mt-1">Manage ecosystem executables</p></div>
+                        <button onclick="openAddModal()" class="bg-accent hover:bg-purple-600 text-white px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest shadow-[0_0_20px_rgba(139,92,246,0.4)] transition hover:scale-105"><i class="fa-solid fa-plus mr-2"></i> Deploy</button>
+                    </div>
+                    <div id="admin-app-list" class="grid grid-cols-1 gap-4"></div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Mobile Nav -->
+        <nav class="md:hidden fixed bottom-6 left-4 right-4 h-16 hud-card rounded-2xl flex items-center justify-around z-50">
+            <button onclick="switchTab('overview')" id="mob-nav-overview" class="text-accent flex flex-col items-center gap-1 w-16"><i class="fa-solid fa-globe text-lg"></i><span class="text-[9px] uppercase font-bold tracking-wider">Home</span></button>
+            <div class="w-px h-8 bg-white/10"></div>
+            <button onclick="switchTab('apps')" id="mob-nav-apps" class="text-gray-500 hover:text-white flex flex-col items-center gap-1 w-16"><i class="fa-solid fa-meteor text-lg"></i><span class="text-[9px] uppercase font-bold tracking-wider">Apps</span></button>
+            <div class="w-px h-8 bg-white/10"></div>
+            <button onclick="logout()" class="text-gray-500 hover:text-red-400 flex flex-col items-center gap-1 w-16"><i class="fa-solid fa-power-off text-lg"></i><span class="text-[9px] uppercase font-bold tracking-wider">Exit</span></button>
+        </nav>
     </div>
 
-    <!-- DASHBOARD SECTION (Hidden by default) -->
-    <div id="dashboard-section" class="hidden w-full max-w-5xl fade-in">
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-8 glass-panel p-4 rounded-xl">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-tr from-primary to-purple-500 rounded-full p-[2px]">
-                    <img src="https://i.pinimg.com/1200x/14/a1/71/14a171de882e567cc020668c691eba2d.jpg" class="w-full h-full rounded-full object-cover">
+    <!-- MODAL WITH PREVIEW -->
+    <div id="modal-overlay" class="fixed inset-0 z-[80] bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4 transition-all duration-300 opacity-0">
+        <div id="modal-content" class="w-full max-w-[750px] hud-card rounded-3xl p-6 transform scale-90 transition-all duration-300 border border-white/10 relative overflow-hidden bg-[#0e0e10]">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent to-transparent"></div>
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-light text-white tracking-widest uppercase" id="modal-title">New Entry</h3>
+                <button onclick="toggleModal(false)" class="w-7 h-7 rounded-full bg-white/5 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center transition"><i class="fa-solid fa-xmark text-xs"></i></button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- FORM -->
+                <div class="space-y-3">
+                    <input type="hidden" id="edit-app-id">
+                    <div>
+                        <label class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">Title</label>
+                        <input type="text" id="app-title" class="w-full h-11 px-4 rounded-xl input-modern outline-none text-sm" onkeyup="updatePreview()">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">Category</label>
+                            <select id="app-category" onchange="autoFillImage(); updatePreview()" class="w-full h-11 px-3 rounded-xl input-modern outline-none appearance-none cursor-pointer text-xs">
+                                <option value="esign">Esign Apps</option>
+                                <option value="ksign">Ksign Certs</option>
+                                <option value="roblox">Roblox</option>
+                                <option value="troll">TrollStore</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">Version</label>
+                            <input type="text" id="app-version" class="w-full h-11 px-4 rounded-xl input-modern outline-none text-sm" onkeyup="updatePreview()">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">Data / Key</label>
+                        <textarea id="app-desc" rows="2" class="w-full p-3 rounded-xl input-modern outline-none text-xs font-mono" onkeyup="updatePreview()"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">URL</label>
+                            <input type="text" id="app-link" class="w-full h-11 px-4 rounded-xl input-modern outline-none text-sm truncate">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-white bg-blue-700/80 px-1 rounded-sm uppercase tracking-widest mb-1.5 inline-block">Image URL</label>
+                            <input type="text" id="app-img" class="w-full h-11 px-4 rounded-xl input-modern outline-none text-sm truncate" onkeyup="updatePreview()" onchange="updatePreview()">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">Badge</label>
+                            <input type="text" id="app-status" placeholder="Active" class="w-full h-11 px-4 rounded-xl input-modern outline-none text-sm" onkeyup="updatePreview()">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">Color</label>
+                            <select id="app-color" class="w-full h-11 px-3 rounded-xl input-modern outline-none text-xs" onchange="updatePreview()">
+                                <option value="text-emerald-400">Emerald</option>
+                                <option value="text-violet-400">Violet</option>
+                                <option value="text-amber-400">Amber</option>
+                                <option value="text-rose-400">Rose</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-lg font-bold leading-none">Admin Dashboard</h1>
-                    <p class="text-xs text-green-400 font-mono">● System Online</p>
+
+                <!-- PREVIEW -->
+                <div class="flex flex-col">
+                    <label class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-3 block text-center md:text-left">Live Preview</label>
+                    <div class="flex-1 flex items-center justify-center p-4 rounded-2xl border border-dashed border-white/10 bg-black/20">
+                        <div class="glass-card-preview tilt-3d w-full p-3 flex items-center gap-4 relative overflow-hidden group" data-tilt-strength="25">
+                            <div class="tilt-glare"></div>
+                            <div class="relative w-14 h-14 shrink-0 rounded-xl overflow-hidden shadow-lg border border-white/10" style="transform:translateZ(20px)">
+                                <img id="preview-img" src="" class="w-full h-full object-cover">
+                            </div>
+                            <div class="flex-1 min-w-0 flex flex-col justify-center" style="transform:translateZ(10px)">
+                                <div class="flex items-center gap-2 mb-0.5">
+                                    <h3 id="preview-title" class="text-base font-bold text-white leading-none truncate">App Name</h3>
+                                    <span id="preview-status" class="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-emerald-400 border border-white/5 whitespace-nowrap">Active</span>
+                                </div>
+                                <p id="preview-desc" class="text-xs text-gray-400 font-khmer truncate">Description text here...</p>
+                                <span id="preview-version" class="text-[10px] text-gray-500 font-mono mt-1">v1.0</span>
+                            </div>
+                            <button class="w-10 h-10 rounded-full bg-white/5 text-accent border border-white/10 flex items-center justify-center shadow-lg shrink-0" style="transform:translateZ(15px)">
+                                <i class="fa-solid fa-download text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <button onclick="logout()" class="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
-                <i class="fa-solid fa-power-off"></i> Logout
-            </button>
-        </div>
-
-        <!-- Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <!-- 1. Total Views Card -->
-            <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
-                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition">
-                    <i class="fa-solid fa-eye text-6xl"></i>
-                </div>
-                <p class="text-gray-400 text-sm font-medium">Total Visits</p>
-                <h2 id="live-views" class="text-5xl font-bold text-white mt-2 tracking-tight">---</h2>
-                <div class="mt-4 text-xs text-gray-500 flex items-center gap-1">
-                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Live updating
-                </div>
-            </div>
-
-            <!-- 2. Edit Views Card (NEW) -->
-            <div class="glass-panel p-6 rounded-2xl flex flex-col justify-between border-l-4 border-l-purple-500">
-                <div>
-                    <h3 class="text-lg font-bold text-white mb-1">Edit Views</h3>
-                    <p class="text-gray-400 text-xs mb-3">Manually set the visitor count.</p>
-                    <input type="number" id="manual-view-input" placeholder="Enter number..." 
-                        class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500 transition-colors font-mono text-sm">
-                </div>
-                <button onclick="updateCustomViews()" class="mt-4 w-full bg-purple-500/10 border border-purple-500/20 text-purple-400 hover:bg-purple-500 hover:text-white py-3 rounded-xl font-bold transition text-sm flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-pen-to-square"></i> Update Count
-                </button>
-            </div>
-
-            <!-- 3. Reset Data Card -->
-            <div class="glass-panel p-6 rounded-2xl flex flex-col justify-between border-l-4 border-l-red-500">
-                <div>
-                    <h3 class="text-lg font-bold text-white mb-1">Reset Data</h3>
-                    <p class="text-gray-400 text-xs">Clear all view counts to 0.</p>
-                </div>
-                <button onclick="resetViews()" class="mt-4 w-full bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white py-3 rounded-xl font-bold transition text-sm flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-trash-can"></i> Reset Counter
-                </button>
-            </div>
-        </div>
-
-        <!-- Connection Status -->
-        <div class="glass-panel p-4 rounded-xl flex items-center justify-between opacity-70">
-            <span class="text-xs text-gray-400">Backend Connection Status:</span>
-            <div class="flex items-center gap-3">
-                <div id="status-dot" class="w-2 h-2 bg-red-500 rounded-full"></div>
-                <span id="status-text" class="text-xs font-mono text-gray-300">Checking...</span>
+            
+            <div class="mt-6 grid grid-cols-2 gap-3">
+                <button onclick="toggleModal(false)" class="h-11 rounded-xl border border-white/10 text-gray-400 font-bold uppercase tracking-wider text-xs hover:bg-white/5 transition">Cancel</button>
+                <button onclick="saveApp()" id="save-btn" class="h-11 rounded-xl bg-accent text-white font-bold uppercase tracking-wider text-xs hover:bg-accent_hover transition shadow-lg">Deploy</button>
             </div>
         </div>
     </div>
+    <div id="toast-container" class="fixed top-6 right-1/2 translate-x-1/2 md:translate-x-0 md:right-6 z-[100] flex flex-col gap-3 w-[90%] md:w-auto pointer-events-none"></div>
 
     <script>
-        // --- CONFIGURATION ---
         const API_URL = "https://nhoy-store.onrender.com/api";
-        // const API_URL = "http://127.0.0.1:5000/api"; // Un-comment for local testing
-        
-        let authToken = localStorage.getItem('nhoy_admin_pass');
+        let authToken = ""; 
+        let appCache = [];
+        const DEFAULT_IMAGES = { esign: "https://esign-ios.app/wp-content/uploads/2025/06/Esign-300x300.webp", ksign: "https://khoindvn.io.vn/img/pf/favicon.ico", roblox: "https://deltaios-executor.com/Icon.jpg", troll: "https://i.pinimg.com/474x/1c/d7/04/1cd7044b82d9ef32d1830008a262e747.jpg" };
 
-        // Initial Load
-        if(authToken) {
-            verifyToken();
-        } else {
-             checkServerStatus();
+        /* --- INITIALIZATION --- */
+        window.addEventListener('load', () => { 
+            const savedPass = localStorage.getItem('nhoy_admin_pass');
+            if(savedPass === 'nhoy') { authToken = savedPass; showDashboard(true); }
+            resizeNova(); animateNova();
+            // Fetch initial locker status if backend supports it
+            fetchLockerStatus();
+        });
+
+        /* --- LOCKER TOGGLE LOGIC --- */
+        let lockerEnabled = true;
+
+        async function fetchLockerStatus() {
+            try {
+                // Assuming an endpoint exists. If not, this might fail silently or needs server code.
+                const res = await fetch(`${API_URL}/admin/setting/locker`);
+                const data = await res.json();
+                if(data && typeof data.enabled !== 'undefined') {
+                    lockerEnabled = data.enabled;
+                    updateLockerUI();
+                }
+            } catch(e) { console.log("Locker status fetch skipped"); }
         }
 
-        // 1. Verify Token
-        async function verifyToken() {
+        async function toggleGlobalLocker() {
+            lockerEnabled = !lockerEnabled;
+            updateLockerUI();
+
+            // Send to Server
             try {
-                const res = await fetch(`${API_URL}/admin/login`, {
+                await fetch(`${API_URL}/admin/setting/locker`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: authToken })
+                    body: JSON.stringify({ password: authToken, enabled: lockerEnabled })
                 });
-                const data = await res.json();
-                
-                if(data.success) {
-                    showDashboard();
-                } else {
-                    logout();
-                }
-            } catch(e) { 
-                document.getElementById('status-text').innerText = "Server Error";
+                showToast(lockerEnabled ? 'Locker System: ACTIVATED' : 'Locker System: DISABLED');
+            } catch(e) {
+                // If API fails, we still show the toast for UI feedback
+                showToast('Updated (Note: Backend endpoint required)', 'success');
             }
         }
 
-        // 2. Login Logic
-        async function doLogin() {
+        function updateLockerUI() {
+            const btn = document.getElementById('locker-btn');
+            const knob = document.getElementById('locker-knob');
+            const text = document.getElementById('locker-text');
+            const dot = document.getElementById('locker-btn'); // reusing styling
+            
+            if(lockerEnabled) {
+                btn.className = "w-12 h-6 rounded-full bg-emerald-500 relative transition-all shadow-lg";
+                knob.className = "w-4 h-4 bg-white rounded-full absolute top-1 right-1 shadow-md transition-all";
+                text.innerText = "ACTIVE";
+                text.className = "text-xs font-bold text-emerald-400";
+            } else {
+                btn.className = "w-12 h-6 rounded-full bg-red-500 relative transition-all shadow-lg";
+                knob.className = "w-4 h-4 bg-white rounded-full absolute top-1 left-1 shadow-md transition-all";
+                text.innerText = "DISABLED";
+                text.className = "text-xs font-bold text-red-400";
+            }
+        }
+
+        /* --- MERGED 3D TILT LOGIC --- */
+        document.addEventListener('mousemove', (e) => {
+            requestAnimationFrame(() => {
+                const cards = document.querySelectorAll('.tilt-3d, .tilt-card');
+                cards.forEach(card => {
+                    const rect = card.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    const globalX = e.clientX - window.innerWidth / 2;
+                    const globalY = e.clientY - window.innerHeight / 2;
+                    const localX = e.clientX - rect.left;
+                    const localY = e.clientY - rect.top;
+                    const isHovering = (e.clientX >= rect.left - 50 && e.clientX <= rect.right + 50 && e.clientY >= rect.top - 50 && e.clientY <= rect.bottom + 50);
+                    const glare = card.querySelector('.tilt-glare');
+                    const strength = card.getAttribute('data-tilt-strength') || 15;
+
+                    if(card.classList.contains('tilt-card')) {
+                         const rotateY = globalX * (0.01 * (strength/10));
+                         const rotateX = globalY * (-0.01 * (strength/10));
+                         card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                         if(glare && isHovering) { glare.style.opacity = '1'; glare.style.background = `radial-gradient(circle at ${localX}px ${localY}px, rgba(255,255,255,0.1), transparent 60%)`; } 
+                         else if (glare) { glare.style.opacity = '0'; }
+                    }
+                    else if (isHovering) {
+                        const xPct = (localX / rect.width) - 0.5;
+                        const yPct = (localY / rect.height) - 0.5;
+                        const rotateY = xPct * strength; 
+                        const rotateX = yPct * -strength;
+                        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                        if(glare) { glare.style.opacity = '1'; glare.style.background = `radial-gradient(circle at ${localX}px ${localY}px, rgba(255,255,255,0.15), transparent 60%)`; }
+                    } else {
+                        card.style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)`;
+                        if(glare) glare.style.opacity = '0';
+                    }
+                });
+            });
+        });
+
+        /* --- AUTH & DASHBOARD LOGIC --- */
+        function doLogin() {
             const pass = document.getElementById('admin-pass').value;
-            const msg = document.getElementById('login-msg');
-            const btn = document.querySelector('#login-section button');
-            
-            if(!pass) return;
-
-            msg.innerText = "";
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Checking...';
-            
-            try {
-                const res = await fetch(`${API_URL}/admin/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: pass })
-                });
-                const data = await res.json();
-                
-                if(data.success) {
-                    localStorage.setItem('nhoy_admin_pass', pass);
-                    authToken = pass;
-                    showDashboard();
-                } else {
-                    msg.innerText = "Incorrect Password!";
-                    btn.innerHTML = '<i class="fa-solid fa-lock-open mr-2"></i> Login';
-                }
-            } catch (err) {
-                msg.innerText = "Connection Failed";
-                btn.innerHTML = '<i class="fa-solid fa-lock-open mr-2"></i> Login';
-            }
+            if(pass === 'nhoy') { authToken = pass; localStorage.setItem('nhoy_admin_pass', pass); showDashboard(false); } 
+            else { showToast('Access Denied', 'error'); document.getElementById('admin-pass').value = ''; const card = document.getElementById('login-card-inner'); card.style.transform = "translateX(10px)"; setTimeout(() => card.style.transform = "translateX(-10px)", 100); setTimeout(() => card.style.transform = "", 200); }
         }
 
-        // 3. Show Dashboard
-        function showDashboard() {
-            document.getElementById('login-section').classList.add('hidden');
-            const dash = document.getElementById('dashboard-section');
-            dash.classList.remove('hidden');
-            
-            document.getElementById('status-dot').className = "w-2 h-2 bg-green-500 rounded-full shadow-[0_0_10px_#22c55e]";
-            document.getElementById('status-text').innerText = "Connected";
-            document.getElementById('status-text').className = "text-xs font-mono text-green-400";
-
-            fetchStats();
-            setInterval(fetchStats, 5000); 
+        function showDashboard(isAuto) {
+            const loginView = document.getElementById('login-view');
+            const dashView = document.getElementById('dashboard-view');
+            if(!isAuto) { loginView.style.transform = 'scale(1.5)'; loginView.style.opacity = '0'; loginView.style.filter = 'blur(20px)'; } 
+            else { loginView.style.display = 'none'; }
+            setTimeout(() => {
+                loginView.style.display = 'none'; dashView.classList.remove('hidden'); setTimeout(() => dashView.classList.remove('opacity-0'), 50);
+                if(!isAuto) showToast('Authenticated: Welcome'); setTimeout(animateCharts, 300); fetchStats(); fetchAdminApps();
+            }, isAuto ? 0 : 500);
         }
 
-        // 4. Fetch Stats
-        async function fetchStats() {
-            try {
-                const res = await fetch(`${API_URL}/stats`);
-                const data = await res.json();
-                if(data.count !== undefined) {
-                    document.getElementById('live-views').innerText = data.count.toLocaleString();
-                }
-            } catch(e) { console.log("Fetch error"); }
+        function animateCharts() {
+            const bars = document.querySelectorAll('.chart-bar'); bars.forEach(bar => { bar.style.height = bar.getAttribute('data-height'); });
+            const circle = document.getElementById('growth-circle'); const text = document.getElementById('growth-text');
+            let percentage = 0; const target = 65;
+            const interval = setInterval(() => { if(percentage >= target) clearInterval(interval); else { percentage++; text.innerText = percentage + '%'; circle.style.background = `conic-gradient(#ffffff ${percentage}%, rgba(255,255,255,0.1) 0)`; } }, 20);
         }
 
-        // 5. Update Custom Views (NEW FUNCTION)
-        async function updateCustomViews() {
-            const inputVal = document.getElementById('manual-view-input').value;
-            
-            if(!inputVal) {
-                alert("Please enter a number.");
-                return;
-            }
-
-            const btn = event.currentTarget;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
-
-            try {
-                const res = await fetch(`${API_URL}/admin/update-views`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        password: authToken,
-                        new_count: parseInt(inputVal)
-                    })
-                });
-                const data = await res.json();
-                
-                if(data.success) {
-                    document.getElementById('live-views').innerText = parseInt(inputVal).toLocaleString();
-                    document.getElementById('manual-view-input').value = "";
-                    alert("✅ Views updated!");
-                } else {
-                    alert("❌ Error: " + data.message);
-                }
-            } catch(e) { 
-                alert("Server connection error");
-            }
-            btn.innerHTML = originalText;
+        /* --- TABS & MODALS --- */
+        function switchTab(tab) {
+            document.getElementById('tab-overview').classList.add('hidden'); document.getElementById('tab-apps').classList.add('hidden');
+            ['desk', 'mob'].forEach(p => {
+                const active = p === 'desk' ? 'bg-white/5 text-white' : 'text-accent'; const inactive = p === 'desk' ? 'text-gray-400' : 'text-gray-500';
+                document.getElementById(`${p}-nav-overview`).className = document.getElementById(`${p}-nav-overview`).className.replace('active', '').replace(active, inactive).replace('text-white', 'text-gray-400').replace('text-accent', 'text-gray-500');
+                document.getElementById(`${p}-nav-apps`).className = document.getElementById(`${p}-nav-apps`).className.replace('active', '').replace(active, inactive).replace('text-white', 'text-gray-400').replace('text-accent', 'text-gray-500');
+            });
+            document.getElementById('tab-' + tab).classList.remove('hidden');
+            const deskNav = document.getElementById(`desk-nav-${tab}`); const mobNav = document.getElementById(`mob-nav-${tab}`);
+            deskNav.className = deskNav.className.replace('text-gray-400', 'text-white bg-white/5') + ' active'; mobNav.className = mobNav.className.replace('text-gray-500', 'text-accent');
+            document.getElementById('page-title').innerText = tab === 'overview' ? 'System Overview' : 'Artifact Library';
+            if(tab === 'overview') setTimeout(animateCharts, 100);
         }
 
-        // 6. Reset Views
-        async function resetViews() {
-            if(!confirm("⚠️ Delete ALL views? This cannot be undone.")) return;
-
-            try {
-                const res = await fetch(`${API_URL}/admin/reset-views`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: authToken })
-                });
-                const data = await res.json();
-                if(data.success) {
-                    alert("✅ Counter reset to 0.");
-                    fetchStats();
-                } else {
-                    alert("Error: " + data.message);
-                }
-            } catch(e) { alert("Server Error"); }
+        function toggleModal(show) {
+            const overlay = document.getElementById('modal-overlay'); const content = document.getElementById('modal-content');
+            if(show) { overlay.classList.remove('hidden'); setTimeout(() => { overlay.classList.remove('opacity-0'); content.classList.remove('scale-90'); content.classList.add('scale-100'); }, 10); } 
+            else { overlay.classList.add('opacity-0'); content.classList.remove('scale-100'); content.classList.add('scale-90'); setTimeout(() => overlay.classList.add('hidden'), 300); }
         }
 
-        // 7. Logout
-        function logout() {
-            localStorage.removeItem('nhoy_admin_pass');
-            location.reload();
+        function updatePreview() {
+            const title = document.getElementById('app-title').value || "App Name"; const img = document.getElementById('app-img').value; const cat = document.getElementById('app-category').value; const ver = document.getElementById('app-version').value || "v1.0"; const desc = document.getElementById('app-desc').value || "Description text here..."; const status = document.getElementById('app-status').value || "Active"; const colorClass = document.getElementById('app-color').value;
+            document.getElementById('preview-img').src = img || DEFAULT_IMAGES[cat] || "https://via.placeholder.com/150"; document.getElementById('preview-title').innerText = title; document.getElementById('preview-version').innerText = ver; document.getElementById('preview-desc').innerText = desc;
+            const prevStatus = document.getElementById('preview-status'); prevStatus.innerText = status; prevStatus.className = `text-[9px] px-1.5 py-0.5 rounded bg-white/10 border border-white/5 whitespace-nowrap ${colorClass}`;
         }
 
-        async function checkServerStatus() {
-            try { await fetch(`${API_URL}/stats`); } 
-            catch(e) { document.getElementById('login-msg').innerText = "⚠️ Backend Offline"; }
-        }
+        /* --- CRUD & API --- */
+        function openAddModal() { document.getElementById('edit-app-id').value = ""; document.getElementById('app-title').value = ""; document.getElementById('app-version').value = ""; document.getElementById('app-desc').value = ""; document.getElementById('app-link').value = ""; document.getElementById('app-img').value = ""; document.getElementById('app-status').value = ""; document.getElementById('modal-title').innerText = "New Artifact"; document.getElementById('save-btn').innerText = "Deploy"; toggleModal(true); autoFillImage(); updatePreview(); }
+        function openEditModal(appId) { const app = appCache.find(a => a._id === appId); if(!app) return; document.getElementById('edit-app-id').value = app._id; document.getElementById('app-category').value = app.category; document.getElementById('app-title').value = app.title; document.getElementById('app-version').value = app.version || ""; document.getElementById('app-desc').value = app.desc || ""; document.getElementById('app-link').value = app.link; document.getElementById('app-img').value = app.img; document.getElementById('app-status').value = app.status || ""; document.getElementById('app-color').value = app.color || "text-emerald-400"; document.getElementById('modal-title').innerText = "Modify Artifact"; document.getElementById('save-btn').innerText = "Update"; toggleModal(true); updatePreview(); }
+        async function saveApp() { const editId = document.getElementById('edit-app-id').value; const payload = { password: authToken, category: document.getElementById('app-category').value, title: document.getElementById('app-title').value, version: document.getElementById('app-version').value, status: document.getElementById('app-status').value, color: document.getElementById('app-color').value, img: document.getElementById('app-img').value, desc: document.getElementById('app-desc').value, link: document.getElementById('app-link').value }; if(!payload.title || !payload.link) return showToast('Required fields missing', 'error'); const endpoint = editId ? `${API_URL}/admin/edit-app` : `${API_URL}/admin/add-app`; if(editId) payload.id = editId; try { const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); const data = await res.json(); if(data.success) { toggleModal(false); showToast('Process Complete'); fetchAdminApps(); } else showToast('Failed (Auth Error)', 'error'); } catch(e) { showToast('Connection Error', 'error'); } }
+        function autoFillImage() { const cat = document.getElementById('app-category').value; const imgInput = document.getElementById('app-img'); if(DEFAULT_IMAGES[cat] && imgInput.value === "") imgInput.value = DEFAULT_IMAGES[cat]; }
+        async function fetchStats() { try { const res = await fetch(`${API_URL}/stats`); const data = await res.json(); document.getElementById('live-views').innerText = data.count.toLocaleString(); } catch(e) {} }
+        async function updateCustomViews() { const val = document.getElementById('manual-view-input').value; if(!val) return; try { await fetch(`${API_URL}/admin/update-views`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: authToken, new_count: val}) }); fetchStats(); showToast('Counter Overwritten'); } catch(e) { showToast('Failed', 'error'); } }
+        async function fetchAdminApps() { const container = document.getElementById('admin-app-list'); const countLabel = document.getElementById('total-apps-count'); container.innerHTML = '<div class="text-center py-8 text-gray-500 animate-pulse">Scanning...</div>'; try { const res = await fetch(`${API_URL}/apps`); const apps = await res.json(); appCache = apps; if(countLabel) countLabel.innerText = apps.length; container.innerHTML = ''; if(apps.length === 0) { container.innerHTML = '<div class="text-center py-10 text-gray-600 border border-dashed border-white/10 rounded-xl">Void Detected</div>'; return; } apps.reverse().forEach(app => { const statusColor = app.color || 'text-emerald-400'; container.innerHTML += `<div class="group hud-card rounded-xl p-4 flex flex-col md:flex-row md:items-center gap-4 transition hover:border-accent/50 relative overflow-hidden bg-[#0e0e10]"><div class="absolute inset-0 bg-gradient-to-r from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div><div class="flex items-center gap-4 flex-1 relative z-10"><img src="${app.img}" class="w-12 h-12 rounded-lg object-cover bg-black border border-white/10 shadow-lg"><div class="min-w-0"><div class="flex items-center gap-2"><h4 class="font-medium text-starlight truncate">${app.title}</h4><span class="md:hidden text-[10px] px-1.5 rounded border border-white/10 text-gray-400">${app.category}</span></div><p class="text-xs text-gray-500 font-mono truncate opacity-70">${app.desc || 'No Data'}</p></div></div><div class="hidden md:flex items-center gap-8 w-1/3 relative z-10"><span class="text-xs uppercase tracking-widest text-gray-600 w-24">${app.category}</span><div class="flex items-center gap-2 px-3 py-1 rounded-full border border-white/5 bg-black/50"><div class="w-1.5 h-1.5 rounded-full ${statusColor} shadow-[0_0_8px_currentColor]"></div><span class="text-xs ${statusColor}">${app.status || 'Active'}</span></div></div><div class="flex md:hidden items-center justify-between border-t border-white/5 pt-3 mt-1 relative z-10"><span class="text-xs ${statusColor} flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full ${statusColor} bg-current"></div>${app.status || 'Active'}</span><span class="text-xs text-gray-600 font-mono">${app.version || 'v1.0'}</span></div><div class="flex items-center justify-end gap-2 mt-2 md:mt-0 relative z-10"><a href="${app.link}" target="_blank" class="w-9 h-9 rounded-lg bg-black/50 hover:bg-white/10 border border-white/5 flex items-center justify-center text-gray-400 hover:text-white transition"><i class="fa-solid fa-arrow-up-right-from-square"></i></a><button onclick="openEditModal('${app._id}')" class="w-9 h-9 rounded-lg bg-black/50 hover:bg-accent/20 border border-white/5 hover:border-accent/30 flex items-center justify-center text-gray-400 hover:text-accent transition"><i class="fa-solid fa-pen"></i></button><button onclick="deleteApp('${app._id}')" class="w-9 h-9 rounded-lg bg-black/50 hover:bg-red-500/20 border border-white/5 hover:border-red-500/30 flex items-center justify-center text-gray-400 hover:text-red-400 transition"><i class="fa-solid fa-trash"></i></button></div></div>`; }); } catch(e) { container.innerHTML = "Signal Lost."; } }
+        async function deleteApp(id) { if(!confirm("Confirm deletion of this artifact?")) return; try { await fetch(`${API_URL}/admin/delete-app`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: authToken, id: id }) }); showToast('Artifact Purged'); fetchAdminApps(); } catch(e) { showToast('Purge Failed', 'error'); } }
+        function showToast(msg, type = 'success') { const container = document.getElementById('toast-container'); const toast = document.createElement('div'); const color = type === 'success' ? 'border-accent text-white' : 'border-red-500 text-red-100'; const icon = type === 'success' ? 'fa-check' : 'fa-triangle-exclamation'; toast.className = `pointer-events-auto bg-black/80 backdrop-blur-md border-l-2 ${color} px-4 py-3 rounded-r shadow-[0_4px_20px_rgba(0,0,0,0.5)] flex items-center gap-3 animate-float min-w-[200px]`; toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span class="text-xs font-bold uppercase tracking-widest">${msg}</span>`; container.appendChild(toast); setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000); }
+        function logout() { localStorage.removeItem('nhoy_admin_pass'); location.reload(); }
+
+        /* --- NOVA ENGINE --- */
+        const canvas = document.getElementById('nova-canvas'); const ctx = canvas.getContext('2d'); let width, height; let stars = []; const starCount = 300; 
+        function resizeNova() { width = window.innerWidth; height = window.innerHeight; canvas.width = width; canvas.height = height; } window.addEventListener('resize', resizeNova);
+        class Star { constructor() { this.reset(); this.z = Math.random() * width; } reset() { this.x = (Math.random() - 0.5) * width * 2; this.y = (Math.random() - 0.5) * height * 2; this.z = width; this.size = Math.random() * 2; this.speed = 1 + Math.random() * 2; this.opacity = Math.random(); } update() { this.z -= this.speed; if (this.z <= 0) this.reset(); } draw() { const x = (this.x / this.z) * width/2 + width / 2; const y = (this.y / this.z) * height/2 + height / 2; const radius = (1 - this.z / width) * this.size * 2; if (x < 0 || x > width || y < 0 || y > height || radius <= 0) return; ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.fillStyle = `rgba(226, 232, 240, ${(1 - this.z / width) * this.opacity})`; ctx.fill(); } }
+        for (let i = 0; i < starCount; i++) stars.push(new Star());
+        function animateNova() { ctx.fillStyle = 'rgba(2, 2, 5, 0.3)'; ctx.fillRect(0, 0, width, height); stars.forEach(star => { star.update(); star.draw(); }); requestAnimationFrame(animateNova); }
     </script>
 </body>
 </html>
